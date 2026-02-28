@@ -219,7 +219,50 @@ h1 {
     font-family: 'DM Mono', monospace;
     font-size: clamp(0.75rem, 1.5vh, 1rem);
     color: var(--muted);
-    padding-bottom: 1.5vh
+    padding-bottom: 1.5vh;
+    gap: 2vw
+}
+
+.status-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text);
+    padding: 0
+}
+
+.nav-btn:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white
+}
+
+.nav-btn:active {
+    transform: scale(0.95)
+}
+
+.nav-btn.paused {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: white
+}
+
+.nav-btn svg {
+    width: 18px;
+    height: 18px
 }
 
 .status-left {

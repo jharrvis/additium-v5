@@ -321,6 +321,35 @@
                 <div class="live-dot"></div>
                 <span>ADDITIUM 3D SPA · REALTIME · LAST SYNC <span x-text="lastSync"></span></span>
             </div>
+            <div class="status-controls">
+                <button class="nav-btn" @click="setScreen(1)" title="Home">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                        <polyline x="9" y="22" x2="9" y2="12"></polyline>
+                    </svg>
+                </button>
+                <button class="nav-btn" @click="prevScreen()" title="Previous">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button class="nav-btn" :class="{paused: paused}" @click="togglePause()" :title="paused ? 'Resume' : 'Pause'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <template x-if="!paused">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                        </template>
+                        <template x-if="paused">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </template>
+                    </svg>
+                </button>
+                <button class="nav-btn" @click="nextScreen()" title="Next">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
             <div x-text="dateStr"></div>
             <div class="auto-rotate-notice">NEXT SCREEN IN <b class="rotate-timer" x-text="rotateCd + 's'"></b></div>
             <div>NEXT REFRESH IN <b :style="`color:${syncColor}`" x-text="refreshCd + 'S'"></b></div>

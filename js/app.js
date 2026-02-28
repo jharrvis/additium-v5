@@ -13,6 +13,7 @@ function spaDashboard() {
         synced: false,
         toasts: [],
         refreshKey: 0,
+        paused: false,
 
         // --- Data Repositories ---
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
@@ -42,10 +43,12 @@ function spaDashboard() {
 
         startRotation() {
             setInterval(() => {
-                this.rotateCd--;
-                if (this.rotateCd <= 0) {
-                    this.rotateCd = CONFIG.rotateInterval;
-                    this.nextScreen();
+                if (!this.paused) {
+                    this.rotateCd--;
+                    if (this.rotateCd <= 0) {
+                        this.rotateCd = CONFIG.rotateInterval;
+                        this.nextScreen();
+                    }
                 }
             }, 1000);
         },
@@ -90,9 +93,20 @@ function spaDashboard() {
             this.activeScreen = (this.activeScreen % CONFIG.screens.length) + 1;
         },
 
+        prevScreen() {
+            this.activeScreen = this.activeScreen <= 1 ? CONFIG.screens.length : this.activeScreen - 1;
+        },
+
         setScreen(id) {
             this.activeScreen = id;
             this.rotateCd = CONFIG.rotateInterval; // Reset timer on manual switch
+        },
+
+        togglePause() {
+            this.paused = !this.paused;
+            if (!this.paused) {
+                this.rotateCd = CONFIG.rotateInterval; // Reset timer when unpausing
+            }
         },
 
         // --- Global Helpers ---
