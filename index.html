@@ -191,28 +191,75 @@
             <div class="main-content" style="flex-direction:column">
                 <div class="hero-row">
                     <div class="hero-card" style="--ca:var(--red);--cg:rgba(220,38,38,0.15)">
-                        <div class="hero-label">SHIPPING TODAY</div>
-                        <div class="hero-value" x-text="pad(orders.valShip)"></div>
-                        <div class="hero-sub">PRIORITY DISPATCH</div>
+                        <div class="hero-card-inner">
+                            <div class="hero-stats">
+                                <div class="hero-label">SHIPPING TODAY</div>
+                                <div class="hero-value" x-text="pad(orders.valShip)"></div>
+                                <div class="hero-sub" x-show="orders.valShip === 0">No orders to ship</div>
+                            </div>
+                            <div class="hero-list-wrapper">
+                                <div class="hero-list">
+                                    <template x-if="orders.valShip === 0">
+                                        <div class="hero-list-empty">No orders</div>
+                                    </template>
+                                    <template x-for="o in orders.list.filter(x => x.cat === 'shipping')" :key="o.id">
+                                        <div class="hero-list-item">
+                                            <span class="hero-list-icon">▶</span> <span x-text="o.id"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="hero-card" style="--ca:var(--blue);--cg:rgba(37,99,235,0.15)">
-                        <div class="hero-label">IN PRODUCTION</div>
-                        <div class="hero-value" x-text="pad(orders.valProd)"></div>
-                        <div class="hero-sub">CURRENTLY MAKING</div>
+                        <div class="hero-card-inner">
+                            <div class="hero-stats">
+                                <div class="hero-label">IN PRODUCTION</div>
+                                <div class="hero-value" x-text="pad(orders.valProd)"></div>
+                                <div class="hero-sub" x-show="orders.valProd === 0">No orders in production</div>
+                            </div>
+                            <div class="hero-list-wrapper">
+                                <div class="hero-list">
+                                    <template x-if="orders.valProd === 0">
+                                        <div class="hero-list-empty">No orders</div>
+                                    </template>
+                                    <template x-for="o in orders.list.filter(x => x.cat === 'production')" :key="o.id">
+                                        <div class="hero-list-item">
+                                            <span class="hero-list-icon">▶</span> <span x-text="o.id"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="hero-card" style="--ca:var(--amber);--cg:rgba(217,119,6,0.15)">
-                        <div class="hero-label">PENDING PROD.</div>
-                        <div class="hero-value" x-text="pad(orders.valPend)"></div>
-                        <div class="hero-sub">IN QUEUE</div>
+                        <div class="hero-card-inner">
+                            <div class="hero-stats">
+                                <div class="hero-label">PENDING PROD.</div>
+                                <div class="hero-value" x-text="pad(orders.valPend)"></div>
+                                <div class="hero-sub" x-show="orders.valPend === 0">No orders pending</div>
+                            </div>
+                            <div class="hero-list-wrapper">
+                                <div class="hero-list">
+                                    <template x-if="orders.valPend === 0">
+                                        <div class="hero-list-empty">No orders</div>
+                                    </template>
+                                    <template x-for="o in orders.list.filter(x => x.cat === 'pending')" :key="o.id">
+                                        <div class="hero-list-item">
+                                            <span class="hero-list-icon">▶</span> <span x-text="o.id"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="table-section">
                     <div class="table-header">
                         <div class="th">ORDER ID</div>
                         <div class="th">CLIENT</div>
-                        <div class="th">TAREA</div>
-                        <div class="th">DATE</div>
-                        <div class="th">IMP.</div>
+                        <div class="th">SHIP DATE</div>
+                        <div class="th">PRIORITY</div>
                         <div class="th">STATUS</div>
                     </div>
                     <div class="table-body">
@@ -223,7 +270,6 @@
                             <div class="order-row" :class="o.cat" :style="`animation-delay:${i*40}ms`">
                                 <div class="order-id" x-text="o.id"></div>
                                 <div class="order-client" x-text="o.client"></div>
-                                <div class="order-tarea" x-text="o.tarea"></div>
                                 <div class="order-date" x-text="o.date"></div>
                                 <div class="order-imp" x-text="o.imp"></div>
                                 <div>

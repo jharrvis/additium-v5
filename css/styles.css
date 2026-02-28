@@ -714,6 +714,68 @@ h1 {
     color: var(--muted)
 }
 
+.orders .hero-card-inner {
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.orders .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    flex-shrink: 0;
+    width: 45%;
+}
+
+.orders .hero-list-wrapper {
+    flex: 1;
+    position: relative;
+    margin-left: 5%;
+}
+
+.orders .hero-list {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+    padding-right: 5px;
+}
+
+.orders .hero-list-item {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.7rem, 1.4vh, 0.95rem);
+    font-weight: 500;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.orders .hero-list-icon {
+    font-size: 0.7em;
+    color: var(--ca);
+    flex-shrink: 0;
+}
+
+.orders .hero-list-empty {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.8rem, 1.5vh, 1rem);
+    color: var(--muted);
+    font-style: italic;
+}
+
+.orders .hero-list::-webkit-scrollbar {
+    width: 3px;
+}
+
+.orders .hero-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
 .orders .table-section {
     flex: 1;
     background: var(--surface);
@@ -729,7 +791,7 @@ h1 {
 
 .orders .table-header {
     display: grid;
-    grid-template-columns: 120px 1fr 130px 150px 170px;
+    grid-template-columns: 180px 1fr 180px 180px 150px;
     padding: 1.5vh 2vw;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
@@ -759,7 +821,7 @@ h1 {
 
 .orders .order-row {
     display: grid;
-    grid-template-columns: 120px 1fr 130px 150px 170px;
+    grid-template-columns: 180px 1fr 180px 180px 150px;
     padding: 1.8vh 2vw;
     border-bottom: 1px solid var(--border);
     align-items: center;
@@ -784,11 +846,11 @@ h1 {
 }
 
 .orders .order-row.shipping {
-    border-left: 4px solid var(--red)
+    border-left: 4px solid var(--amber)
 }
 
 .orders .order-row.production {
-    border-left: 4px solid var(--blue)
+    border-left: 4px solid var(--amber)
 }
 
 .orders .order-row.pending {
@@ -807,8 +869,9 @@ h1 {
 }
 
 .orders .order-client {
-    font-size: clamp(1rem, 2.1vh, 1.5rem);
-    font-weight: 600
+    font-size: clamp(0.95rem, 2vh, 1.4rem);
+    font-weight: 600;
+    color: var(--text)
 }
 
 .orders .order-date {
@@ -827,39 +890,40 @@ h1 {
 .orders .chip {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 5px 14px;
+    padding: 4px 14px;
     border-radius: 100px;
     font-family: 'DM Mono', monospace;
-    font-size: clamp(0.8rem, 1.5vh, 1rem);
-    font-weight: 500;
+    font-size: clamp(0.7rem, 1.4vh, 0.9rem);
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     border: 1px solid
 }
 
 .orders .chip-ship {
-    background: rgba(220, 38, 38, .1);
-    color: var(--red);
-    border-color: rgba(220, 38, 38, .3)
+    background: transparent;
+    color: var(--amber);
+    border-color: rgba(217, 119, 6, .5)
 }
 
 .orders .chip-prod {
-    background: rgba(37, 99, 235, .1);
-    color: var(--blue);
-    border-color: rgba(37, 99, 235, .3)
+    background: transparent;
+    color: var(--amber);
+    border-color: rgba(217, 119, 6, .5)
 }
 
 .orders .chip-pend {
-    background: rgba(217, 119, 6, .1);
+    background: transparent;
     color: var(--amber);
-    border-color: rgba(217, 119, 6, .3)
+    border-color: rgba(217, 119, 6, .5)
 }
 
 .orders .chip-done {
-    background: rgba(5, 150, 105, .1);
-    color: var(--green);
-    border-color: rgba(5, 150, 105, .25)
+    background: transparent;
+    color: var(--amber);
+    border-color: rgba(217, 119, 6, .5)
 }
 
 .orders .chip-dot {
