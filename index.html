@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADDITIUM 3D — MASTER DASHBOARD SPA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <style>
+        /* SPA Transitions */
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .screen-fade-enter {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+
+        .screen-fade-enter-active {
+            transition: all 0.5s ease-out;
+        }
+
+        .screen-fade-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .screen-fade-exit-active {
+            opacity: 0;
+            transform: scale(1.02);
+            transition: all 0.5s ease-in;
+        }
+
+        .master-wrap {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Screen IDs positioning */
+        .screen-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-slot {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body x-data="spaDashboard()" x-init="init()" class="master-wrap">
+
+    <!-- TOASTS (Global) -->
+    <div class="toast-wrap">
+        <template x-for="t in toasts" :key="t.id">
+            <div class="toast" x-show="t.show" x-transition.opacity.duration.300ms :style="`--tc:${t.color}`">
+                <div class="toast-icon" x-text="t.icon"></div>
+                <div>
+                    <div class="toast-title" x-text="t.title"></div>
+                    <div class="toast-msg" x-text="t.msg"></div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- GLOBAL HEADER -->
+    <header>
+        <div class="header-left">
+            <h1 x-text="CONFIG.screens[activeScreen-1].title">DASHBOARD</h1>
+            <span class="page-badge"
+                :class="{todo: activeScreen===1, orders: activeScreen===2, events: activeScreen===3}"
+                x-text="CONFIG.screens[activeScreen-1].badge"></span>
+        </div>
+        <div class="header-right">
+            <div class="sync-pill" :style="`color:${syncColor}`">
+                <div class="sync-pip"></div>
+                <span x-text="synced ? 'SYNCED ✓' : `SYNC IN ${refreshCd}S`"></span>
+            </div>
+            <div class="live-clock" x-text="clock"></div>
+            <div class="logo-box" @click="setScreen(1)">
+                <img src="img/logo_additium.png" alt="ADDITIUM 3D">
+            </div>
+        </div>
+    </header>
+
+    <!-- SPA SCREEN CONTAINER -->
+    <div class="screen-container">
+
+        <!-- SCREEN 01: TODO -->
+        <div class="screen-slot todo" x-show="activeScreen === 1" x-transition:enter="screen-fade-enter-active"
+            x-transition:enter-start="screen-fade-enter" x-transition:leave="screen-fade-exit-active"
+            x-transition:leave-start="screen-fade-exit">
+
+            <div class="main-content">
+                <div class="loading-state" x-show="loading">
+                    <div class="spinner"></div>
+                    <span>FETCHING TODO DATA…</span>
+                </div>
+                <div class="board" x-show="!loading" x-cloak>
+                    <template x-if="todo.employees.length === 0">
+                        <div class="empty-board">No active tasks</div>
+                    </template>
+                    <template x-for="(emp, ei) in todo.employees" :key="emp.name + refreshKey">
+                        <div class="emp-col" :style="`animation-delay:${ei*70}ms`">
+                            <div class="emp-header">
+                                <span class="emp-name" x-text="emp.name"></span>
+                                <span class="emp-count" x-text="emp.urgent.length + emp.others.length"></span>
+                            </div>
+                            <!-- Pinned Urgent Section -->
+                            <div class="emp-pinned" x-show="emp.urgent.length > 0">
+                                <template x-for="(task, ti) in emp.urgent" :key="'u'+ti">
+                                    <div class="task-card is-urgent" :style="`--prio-color:${task.color}`">
+                                        <div class="task-priority">
+                                            <div class="prio-dot"></div>
+                                            <span class="prio-label" x-text="task.priority"></span>
+                                        </div>
+                                        <div class="task-text" x-text="task.text"></div>
+                                        <div class="task-deadline" x-show="task.deadlineDay || task.deadlineTime">
+                                            <span x-text="task.deadlineDay"></span>
+                                            <span x-show="task.deadlineDay && task.deadlineTime">·</span>
+                                            <span x-text="task.deadlineTime"></span>
+                                        </div>
+                                        <div class="task-status" x-text="task.status"></div>
+                                    </div>
+                                </template>
+                            </div>
+                            <!-- Scrolling Section -->
+                            <div class="emp-tasks">
+                                <template x-for="(task, ti) in emp.others" :key="'o'+ti">
+                                    <div class="task-card" :style="`--prio-color:${task.color}`">
+                                        <div class="task-priority">
+                                            <div class="prio-dot"></div>
+                                            <span class="prio-label" x-text="task.priority"></span>
+                                        </div>
+                                        <div class="task-text" x-text="task.text"></div>
+                                        <div class="task-deadline" x-show="task.deadlineDay || task.deadlineTime">
+                                            <span x-text="task.deadlineDay"></span>
+                                            <span x-show="task.deadlineDay && task.deadlineTime">·</span>
+                                            <span x-text="task.deadlineTime"></span>
+                                        </div>
+                                        <div class="task-status" x-text="task.status"></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="kpi-panel" x-show="!loading" x-cloak>
+                    <div class="kpi-block">
+                        <div class="kpi-label">Open Tasks</div>
+                        <div class="kpi-value" x-text="pad(todo.kpiOpen)"></div>
+                        <div class="kpi-sub" x-text="`ACROSS ${todo.kpiEmp} EMPLOYEE${todo.kpiEmp!==1?'S':''}`"></div>
+                    </div>
+                    <div class="kpi-divider"></div>
+                    <div class="kpi-block">
+                        <div class="kpi-label">Urgent (P1)</div>
+                        <div class="kpi-value" x-text="pad(todo.kpiUrgent)" style="color:var(--red)"></div>
+                        <div class="kpi-sub">REQUIRES ATTENTION</div>
+                    </div>
+                    <div class="kpi-divider"></div>
+                    <div class="kpi-block">
+                        <div class="kpi-label">In Progress</div>
+                        <div class="kpi-value" x-text="pad(todo.kpiProg)" style="color:var(--amber)"></div>
+                        <div class="kpi-sub">CURRENTLY ACTIVE</div>
+                    </div>
+                    <div class="kpi-divider"></div>
+                    <div class="legend">
+                        <div class="kpi-label">Priority Legend</div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>URGENT</div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#d97706"></span>HIGH</div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>NORMAL</div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#059669"></span>LOW</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 02: ORDERS -->
+        <div class="screen-slot orders" x-show="activeScreen === 2" x-transition:enter="screen-fade-enter-active"
+            x-transition:enter-start="screen-fade-enter" x-transition:leave="screen-fade-exit-active"
+            x-transition:leave-start="screen-fade-exit">
+
+            <div class="main-content" style="flex-direction: column;">
+                <div class="hero-row">
+                    <div class="hero-card" style="--ca:var(--red);--cg:rgba(220,38,38,0.15)">
+                        <div class="hero-label">SHIPPING TODAY</div>
+                        <div class="hero-value" x-text="pad(orders.valShip)">00</div>
+                        <div class="hero-sub">PRIORITY DISPATCH</div>
+                    </div>
+                    <div class="hero-card" style="--ca:var(--blue);--cg:rgba(37,99,235,0.15)">
+                        <div class="hero-label">IN PRODUCTION</div>
+                        <div class="hero-value" x-text="pad(orders.valProd)">00</div>
+                        <div class="hero-sub">CURRENTLY MAKING</div>
+                    </div>
+                    <div class="hero-card" style="--ca:var(--amber);--cg:rgba(217,119,6,0.15)">
+                        <div class="hero-label">PENDING PROD.</div>
+                        <div class="hero-value" x-text="pad(orders.valPend)">00</div>
+                        <div class="hero-sub">IN QUEUE</div>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <div class="table-header">
+                        <div class="th">ORDER ID</div>
+                        <div class="th">CLIENT / PROJECT</div>
+                        <div class="th">DATE</div>
+                        <div class="th">IMP.</div>
+                        <div class="th">STATUS</div>
+                    </div>
+                    <div class="table-body">
+                        <template x-if="orders.list.length === 0">
+                            <div class="empty-table" x-show="!loading">No orders found</div>
+                        </template>
+                        <template x-for="(o, i) in orders.list" :key="o.id + refreshKey">
+                            <div class="order-row" :class="o.cat" :style="`animation-delay:${i*40}ms`">
+                                <div class="order-id" x-text="o.id"></div>
+                                <div class="order-client" x-text="o.client"></div>
+                                <div class="order-date" x-text="o.date"></div>
+                                <div class="order-imp" x-text="o.imp"></div>
+                                <div class="order-status">
+                                    <div class="chip" :class="o.chipClass">
+                                        <div class="chip-dot"></div>
+                                        <span x-text="o.chipLabel"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 03: EVENTS -->
+        <div class="screen-slot events" x-show="activeScreen === 3" x-transition:enter="screen-fade-enter-active"
+            x-transition:enter-start="screen-fade-enter" x-transition:leave="screen-fade-exit-active"
+            x-transition:leave-start="screen-fade-exit">
+
+            <div class="main-content">
+                <!-- Left: Today's Focus -->
+                <div class="col-panel col-today">
+                    <div class="col-header">
+                        <span class="col-title">TODAY</span>
+                        <span class="col-count"
+                            x-text="events.today.length + ' EVENT' + (events.today.length !== 1 ? 'S' : '')"></span>
+                    </div>
+                    <div class="event-list">
+                        <template x-if="events.today.length === 0">
+                            <div class="empty-state">
+                                <div class="empty-icon">✅</div>
+                                <div>No events today</div>
+                            </div>
+                        </template>
+                        <template x-for="(e, i) in events.today" :key="i + refreshKey">
+                            <div class="event-card-today" :style="`animation-delay:${i*70}ms`">
+                                <div class="ev-time" x-text="e.time || 'TBD'"></div>
+                                <div class="ev-title-today" x-text="e.title"></div>
+                                <div class="ev-meta">
+                                    <span x-show="e.place">📍 <span x-text="e.place"></span></span>
+                                    <span x-show="e.responsible">👤 <span x-text="e.responsible"></span></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Right: Upcoming -->
+                <div class="col-panel col-upcoming">
+                    <div class="col-header">
+                        <span class="col-title">UPCOMING</span>
+                        <span class="col-count" x-text="events.upcoming.length + ' SCHEDULED'"></span>
+                    </div>
+                    <div class="event-list">
+                        <template x-if="events.upcoming.length === 0">
+                            <div class="empty-state">
+                                <div class="empty-icon">🗓</div>
+                                <div>No upcoming events</div>
+                            </div>
+                        </template>
+                        <template x-for="(e, i) in events.upcoming" :key="i + refreshKey">
+                            <div class="dep-row" :style="`animation-delay:${i*60}ms`">
+                                <div>
+                                    <div class="dep-date" x-text="e.dateLabel"></div>
+                                    <div class="dep-day" x-text="e.dayName"></div>
+                                </div>
+                                <div>
+                                    <div class="dep-title" x-text="e.title"></div>
+                                    <div class="dep-meta"
+                                        x-text="[e.time, e.place, e.responsible].filter(Boolean).join(' · ')"></div>
+                                </div>
+                                <div class="dep-badge" :class="e.badgeClass" x-text="e.countdownLabel"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GLOBAL STATUS BAR -->
+    <div class="status-bar">
+        <div class="sync-track">
+            <div class="sync-fill" :class="{flash:synced}" :style="`width:${rotatePct}%; background:var(--blue)`"></div>
+        </div>
+        <div class="status-row">
+            <div class="status-left">
+                <div class="live-dot"></div>
+                <span>ADDITIUM 3D SPA · REALTIME · LAST SYNC <span x-text="lastSync"></span></span>
+            </div>
+            <div x-text="dateStr"></div>
+            <div class="auto-rotate-notice">NEXT SCREEN IN <b class="rotate-timer" x-text="rotateCd + 's'"></b></div>
+            <div>NEXT REFRESH IN <b :style="`color:${syncColor}`" x-text="refreshCd + 'S'"></b></div>
+        </div>
+    </div>
+
+</body>
+
+</html>
