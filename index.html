@@ -217,6 +217,7 @@
                     <div class="table-header">
                         <div class="th">ORDER ID</div>
                         <div class="th">CLIENT / PROJECT</div>
+                        <div class="th">TAREA</div>
                         <div class="th">DATE</div>
                         <div class="th">IMP.</div>
                         <div class="th">STATUS</div>
@@ -229,6 +230,7 @@
                             <div class="order-row" :class="o.cat" :style="`animation-delay:${i*40}ms`">
                                 <div class="order-id" x-text="o.id"></div>
                                 <div class="order-client" x-text="o.client"></div>
+                                <div class="order-tarea" x-text="o.tarea"></div>
                                 <div class="order-date" x-text="o.date"></div>
                                 <div class="order-imp" x-text="o.imp"></div>
                                 <div class="order-status">
@@ -333,15 +335,16 @@
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                 </button>
-                <button class="nav-btn" :class="{paused: paused}" @click="togglePause()" :title="paused ? 'Resume' : 'Pause'">
+                <button class="nav-btn" :class="{paused: paused}" @click="togglePause()"
+                    :title="paused ? 'Resume' : 'Pause'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <template x-if="!paused">
+                        <g x-show="!paused">
                             <rect x="6" y="4" width="4" height="16"></rect>
                             <rect x="14" y="4" width="4" height="16"></rect>
-                        </template>
-                        <template x-if="paused">
+                        </g>
+                        <g x-show="paused">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </template>
+                        </g>
                     </svg>
                 </button>
                 <button class="nav-btn" @click="nextScreen()" title="Next">

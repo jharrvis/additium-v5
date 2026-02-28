@@ -183,35 +183,56 @@ function spaDashboard() {
             const PO = { URGENTE: 0, ALTA: 1, NORMAL: 2, BAJA: 3 };
 
             const active = rows.filter(r => {
-                const w = (r[COLS.worker] || '').trim();
-                const s = (r[COLS.status] || '').toUpperCase().trim();
+                const hasId = r.length === 7 && r[0].trim() !== '';
+                const offset = hasId ? 0 : -1;
+                const w = (r[COLS.worker + offset] || '').trim();
+                const s = (r[COLS.status + offset] || '').toUpperCase().trim();
                 return w && !DONE.includes(s);
             });
 
             const byW = {};
             active.forEach(r => {
-                const w = (r[COLS.worker] || '').trim().toUpperCase();
+                const hasId = r.length === 7 && r[0].trim() !== '';
+                const offset = hasId ? 0 : -1;
+                const w = (r[COLS.worker + offset] || '').trim().toUpperCase();
                 if (!byW[w]) byW[w] = [];
                 byW[w].push(r);
             });
 
             const workers = Object.keys(byW).sort((a, b) => {
-                const ua = byW[a].filter(r => (r[COLS.priority] || '').toUpperCase().trim() === 'URGENTE').length;
-                const ub = byW[b].filter(r => (r[COLS.priority] || '').toUpperCase().trim() === 'URGENTE').length;
-                return ub - ua || a.localeCompare(b);
+                const getUrgCount = (arr) => arr.filter(r => {
+                    const hasId = r.length === 7 && r[0].trim() !== '';
+                    return (r[COLS.priority + (hasId ? 0 : -1)] || '').toUpperCase().trim() === 'URGENTE';
+                }).length;
+                return getUrgCount(byW[b]) - getUrgCount(byW[a]) || a.localeCompare(b);
             });
 
             this.todo.employees = workers.map(w => {
-                const tasks = byW[w].sort((a, b) => (PO[(a[COLS.priority] || 'NORMAL').toUpperCase().trim()] ?? 2) - (PO[(b[COLS.priority] || 'NORMAL').toUpperCase().trim()] ?? 2))
-                    .map(r => ({
-                        priority: (r[COLS.priority] || 'NORMAL').toUpperCase().trim(),
-                        text: (r[2] || r[COLS.task] || '—').trim(), // Robust fallback
-                        status: (r[COLS.status] || 'PENDING').toUpperCase().trim(),
-                        color: PC[(r[COLS.priority] || 'NORMAL').toUpperCase().trim()] || '#888',
-                        isUrgent: (r[COLS.priority] || 'NORMAL').toUpperCase().trim() === 'URGENTE',
-                        deadlineDay: r[5] || '',
-                        deadlineTime: r[6] || '',
-                    }));
+                const tasks = byW[w].sort((a, b) => {
+                    const pa = b[COLS.priority] ? PO[(a[COLS.priority] || 'NORMAL').toUpperCase().trim()] ?? 2 : PO[(a[COLS.priority - 1] || 'NORMAL').toUpperCase().trim()] ?? 2;
+                    const pb = b[COLS.priority] ? PO[(b[COLS.priority] || 'NORMAL').toUpperCase().trim()] ?? 2 : PO[(b[COLS.priority - 1] || 'NORMAL').toUpperCase().trim()] ?? 2;
+                    return pa - pb;
+                }).map(r => {
+                    // Check if ID exists to determine offset
+                    const hasId = r.length === 7 && r[0].trim() !== '';
+                    const offset = hasId ? 0 : -1;
+
+                    const priority = (r[COLS.priority + offset] || 'NORMAL').toUpperCase().trim();
+                    const text = (r[COLS.task + offset] || '—').trim();
+                    const status = (r[COLS.status + offset] || 'PENDING').toUpperCase().trim();
+                    const deadlineDay = r[5 + offset] || '';
+                    const deadlineTime = r[6 + offset] || '';
+
+                    return {
+                        priority,
+                        text,
+                        status,
+                        color: PC[priority] || '#888',
+                        isUrgent: priority === 'URGENTE',
+                        deadlineDay,
+                        deadlineTime,
+                    };
+                });
 
                 return {
                     name: w,
@@ -220,11 +241,15 @@ function spaDashboard() {
                 };
             });
 
-            const urgCount = active.filter(r => (r[COLS.priority] || '').toUpperCase().trim() === 'URGENTE').length;
+            const urgCount = active.filter(r => {
+                const hasId = r.length === 7 && r[0].trim() !== '';
+                return (r[COLS.priority + (hasId ? 0 : -1)] || '').toUpperCase().trim() === 'URGENTE';
+            }).length;
             this.todo.kpiOpen = active.length;
             this.todo.kpiUrgent = urgCount;
             this.todo.kpiProg = active.filter(r => {
-                const s = (r[COLS.status] || '').toUpperCase().trim();
+                const hasId = r.length === 7 && r[0].trim() !== '';
+                const s = (r[COLS.status + (hasId ? 0 : -1)] || '').toUpperCase().trim();
                 return s.includes('CURSO') || s.includes('PROGRESS') || s.includes('HACIENDO');
             }).length;
             this.todo.kpiEmp = workers.length;
@@ -237,7 +262,7 @@ function spaDashboard() {
 
         // --- Screen 02: ORDERS Logic ---
         processOrders(rows) {
-            const COLS = { id: 0, client: 1, date: 2, importance: 3, status: 4 };
+            const COLS = { id: 0, client: 1, tarea: 2, importance: 3, status: 4, date: 5 };
             const CAT_ORDER = { shipping: 0, production: 1, pending: 2, done: 3 };
 
             const valid = rows.filter(r => (r[COLS.id] || '').trim());
@@ -266,8 +291,14 @@ function spaDashboard() {
                 };
 
                 return {
-                    id: r[COLS.id] || '—', client: r[COLS.client] || '—', date: dl, imp: (r[COLS.importance] || '—').toUpperCase(), cat,
-                    chipClass: chips[cat].cls, chipLabel: chips[cat].lbl
+                    id: r[COLS.id] || '—',
+                    client: r[COLS.client] || '—',
+                    tarea: r[COLS.tarea] || '—',
+                    date: dl,
+                    imp: (r[COLS.importance] || '—').toUpperCase(),
+                    cat,
+                    chipClass: chips[cat].cls,
+                    chipLabel: chips[cat].lbl
                 };
             });
 
