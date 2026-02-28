@@ -28,6 +28,7 @@ const CONFIG = {
     priorities: {
         URGENTE: '#dc2626',
         ALTA: '#d97706',
+        IMPORTANTE: '#d97706',
         NORMAL: '#2563eb',
         BAJA: '#059669'
     },
