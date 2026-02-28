@@ -8,6 +8,7 @@ function spaDashboard() {
         activeScreen: 1,
         rotateCd: CONFIG.rotateInterval,
         refreshCd: CONFIG.refreshInterval,
+        rotateIntervalCurrent: CONFIG.rotateInterval,
         clock: '--:--:--',
         dateStr: '--',
         lastSync: '--:--:--',
@@ -16,6 +17,7 @@ function spaDashboard() {
         toasts: [],
         refreshKey: 0,
         paused: false,
+        isFullscreen: false,
 
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
         orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0 },
@@ -28,6 +30,7 @@ function spaDashboard() {
             this.startRotation();
             this.startRefreshTimer();
             this.initAutoScroll();
+            this.initFullscreenListener();
         },
 
         startClock() {
@@ -87,6 +90,26 @@ function spaDashboard() {
         prevScreen() { this.activeScreen = this.activeScreen <= 1 ? CONFIG.screens.length : this.activeScreen - 1; },
         setScreen(id) { this.activeScreen = id; this.rotateCd = CONFIG.rotateInterval; },
         togglePause() { this.paused = !this.paused; if (!this.paused) this.rotateCd = CONFIG.rotateInterval; },
+
+        setRotateInterval(sec) {
+            CONFIG.rotateInterval = sec;
+            this.rotateIntervalCurrent = sec;
+            this.rotateCd = sec;
+        },
+
+        toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        },
+
+        initFullscreenListener() {
+            document.addEventListener('fullscreenchange', () => {
+                this.isFullscreen = !!document.fullscreenElement;
+            });
+        },
 
         get rotatePct() { return (this.rotateCd / CONFIG.rotateInterval) * 100; },
         get syncColor() { return this.refreshCd <= 8 ? 'var(--red)' : this.refreshCd <= 18 ? 'var(--amber)' : 'var(--green)'; },

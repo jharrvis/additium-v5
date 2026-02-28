@@ -2,7 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== CSS RESET (required since preflight is disabled) ===== */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /* ===== CUSTOM STYLES THAT CANNOT BE UTILITY-FIRST ===== */
+
+/* CSS Variables */
+:root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: rgba(0, 0, 0, 0.08);
+    --text: #1a1a2e;
+    --muted: rgba(26, 26, 46, 0.5);
+    --blue: #2563eb;
+    --green: #059669;
+    --amber: #d97706;
+    --red: #dc2626;
+    --purple: #7c3aed;
+}
 
 /* Grid background overlay */
 body::before {
@@ -13,7 +37,6 @@ body::before {
     background-image: linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
     background-size: 50px 50px;
-    z-index: 0;
 }
 
 /* Hero card gradient overlay */
@@ -43,6 +66,28 @@ body::before {
 .todo .task-deadline::before {
     content: '🕒';
     font-size: 0.9em;
+}
+
+/* KPI panel — compact for TV readability */
+.todo .kpi-panel {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.todo .kpi-value {
+    line-height: 0.85;
+}
+
+/* Status bar top margin - match original */
+.status-bar {
+    margin-top: 1.5vh;
+}
+
+/* Hero value line-height - match original */
+.orders .hero-value {
+    line-height: 0.85;
 }
 
 /* Screen fade transitions */
@@ -108,20 +153,23 @@ body::before {
     color: #ffffff;
 }
 
-/* Event badge colors */
-.dep-badge.tomorrow {
-    background: rgba(37, 99, 235, 0.1);
-    color: var(--blue);
+/* Event badge colors — MUST MATCH ORIGINAL */
+.dep-badge.normal {
+    color: var(--purple);
+    background: rgba(124, 58, 237, 0.1);
+    border-color: rgba(124, 58, 237, 0.2);
 }
 
 .dep-badge.soon {
-    background: rgba(217, 119, 6, 0.1);
     color: var(--amber);
+    background: rgba(217, 119, 6, 0.1);
+    border-color: rgba(217, 119, 6, 0.25);
 }
 
-.dep-badge.normal {
-    background: rgba(5, 150, 105, 0.1);
-    color: var(--green);
+.dep-badge.tomorrow {
+    color: var(--red);
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.25);
 }
 
 /* Order row border colors */
@@ -250,32 +298,255 @@ body::before {
 .todo .emp-tasks::-webkit-scrollbar,
 .todo .board::-webkit-scrollbar,
 .orders .hero-list::-webkit-scrollbar,
-.orders .table-body::-webkit-scrollbar {
-    width: 4px;
+.orders .table-body::-webkit-scrollbar,
+.events .event-list::-webkit-scrollbar {
+    width: 3px;
     height: 4px;
 }
 
 .todo .emp-tasks::-webkit-scrollbar-thumb,
 .todo .board::-webkit-scrollbar-thumb,
 .orders .hero-list::-webkit-scrollbar-thumb,
-.orders .table-body::-webkit-scrollbar-thumb {
+.orders .table-body::-webkit-scrollbar-thumb,
+.events .event-list::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.1);
     border-radius: 2px;
-}
-
-.todo .emp-tasks::-webkit-scrollbar {
-    width: 3px;
-}
-
-.orders .hero-list::-webkit-scrollbar {
-    width: 3px;
 }
 
 .orders .hero-list::-webkit-scrollbar-thumb {
     border-radius: 3px;
 }
 
+.orders .table-body::-webkit-scrollbar {
+    width: 4px;
+}
+
 /* Auto scroll reset marker */
 [data-resetting] {
     /* marker for JS auto-scroll reset */
+}
+
+/* ===== STATUS BAR SELECT CONTROLS ===== */
+.status-select {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.75rem, 1.5vh, 1rem);
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease, color 0.2s ease;
+    -webkit-appearance: auto;
+    appearance: auto;
+}
+
+.status-select:hover {
+    color: var(--text);
+    border-color: rgba(0, 0, 0, 0.18);
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: var(--blue);
+    color: var(--text);
+}
+
+/* ===== EVENTS PAGE (Screen 03) ===== */
+/* These styles must match original CSS exactly */
+
+.events-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5vw;
+}
+
+.events .col-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.events .col-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2vh;
+    padding-bottom: 1.5vh;
+    border-bottom: 2px solid var(--col-accent);
+    flex-shrink: 0;
+}
+
+.events .col-title {
+    font-size: clamp(2rem, 5.5vh, 4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.events .col-count {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.85rem, 1.7vh, 1.2rem);
+    color: var(--col-accent);
+}
+
+.events .col-today {
+    --col-accent: var(--green);
+}
+
+.events .col-upcoming {
+    --col-accent: var(--purple);
+}
+
+.events .event-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4vh;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 4px;
+}
+
+.events .event-card-today {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    padding: 2.2vh 2vw;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.45s ease both;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.events .event-card-today::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle at top right, rgba(5, 150, 105, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.events .ev-time {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(1.1rem, 3vh, 2.2rem);
+    font-weight: 500;
+    color: var(--green);
+}
+
+.events .ev-title-today {
+    font-size: clamp(1.5rem, 4.5vh, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text);
+}
+
+.events .ev-meta {
+    display: flex;
+    gap: 2vw;
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.85rem, 1.7vh, 1.1rem);
+    color: var(--muted);
+    margin-top: 0.5vh;
+    flex-wrap: wrap;
+}
+
+.events .dep-row {
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    gap: 1.5vw;
+    align-items: center;
+    padding: 1.6vh 1.5vw;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    animation: depIn 0.4s ease both;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes depIn {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.events .dep-row:first-child {
+    border-top: 1px solid var(--border);
+}
+
+.events .dep-row:hover {
+    background: var(--surface2);
+}
+
+.events .dep-date {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.95rem, 2vh, 1.4rem);
+    font-weight: 500;
+    color: var(--purple);
+    line-height: 1.3;
+}
+
+.events .dep-day {
+    font-size: clamp(0.75rem, 1.4vh, 0.95rem);
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.events .dep-title {
+    font-size: clamp(1.1rem, 2.3vh, 1.7rem);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.events .dep-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.8rem, 1.5vh, 1rem);
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.events .dep-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(0.8rem, 1.5vh, 1rem);
+    padding: 5px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 500;
+    border: 1px solid;
+}
+
+.events .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1.5vh;
+    height: 100%;
+    font-family: 'DM Mono', monospace;
+    color: rgba(0, 0, 0, 0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: clamp(0.85rem, 1.6vh, 1.1rem);
+}
+
+.events .empty-icon {
+    font-size: 2.5rem;
+    opacity: 0.2;
 }
