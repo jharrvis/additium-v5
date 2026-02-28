@@ -244,7 +244,7 @@ function spaDashboard() {
                 let cat = 'pending';
                 if (stUpper.includes('ENVIAD') || CONFIG.doneStatuses.includes(stUpper)) cat = 'done';
                 else if (stUpper.includes('LISTO') || stUpper.includes('SHIP') || stUpper.includes('DESPACHO') || this.isToday(r[COLS.date])) cat = 'shipping';
-                else if (stUpper.includes('FABRICAN') || stUpper.includes('CURSO') || stUpper.includes('PRODUC')) cat = 'production';
+                else if (stUpper.includes('FABRICAN') || stUpper.includes('FABRICÁN') || stUpper.includes('CURSO') || stUpper.includes('PRODUC')) cat = 'production';
                 else if (stUpper.includes('POR FAB') || stUpper.includes('PEND')) cat = 'pending';
                 if (cat === 'shipping') shipCount++; else if (cat === 'production') prodCount++; else if (cat === 'pending') pendCount++;
                 const d = this.parseDate(r[COLS.date]);
@@ -258,7 +258,7 @@ function spaDashboard() {
                 const rawImp = (r[COLS.importance] || '—').trim();
                 const impUpper = rawImp.toUpperCase();
                 let impPillClass = '';
-                if (impUpper.includes('XIM') || impUpper.includes('MAX')) impPillClass = 'pill-maxima';
+                if (impUpper.includes('XIM') || impUpper.includes('XÍM') || impUpper.includes('MAX')) impPillClass = 'pill-maxima';
                 else if (impUpper.includes('ALTA')) impPillClass = 'pill-alta';
                 else if (impUpper.includes('NORMAL')) impPillClass = 'pill-normal';
                 else if (impUpper.includes('BAJA')) impPillClass = 'pill-baja';
