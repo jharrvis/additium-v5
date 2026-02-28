@@ -190,7 +190,7 @@
 
             <div class="main-content" style="flex-direction:column">
                 <div class="hero-row">
-                    <div class="hero-card" style="--ca:var(--red);--cg:rgba(220,38,38,0.15)">
+                    <div class="hero-card" style="--ca:#1a7b4f;--cg:rgba(26,123,79,0.15)">
                         <div class="hero-card-inner">
                             <div class="hero-stats">
                                 <div class="hero-label">SHIPPING TODAY</div>
@@ -211,7 +211,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="hero-card" style="--ca:var(--blue);--cg:rgba(37,99,235,0.15)">
+                    <div class="hero-card" style="--ca:#a91f24;--cg:rgba(169,31,36,0.15)">
                         <div class="hero-card-inner">
                             <div class="hero-stats">
                                 <div class="hero-label">IN PRODUCTION</div>
@@ -232,7 +232,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="hero-card" style="--ca:var(--amber);--cg:rgba(217,119,6,0.15)">
+                    <div class="hero-card" style="--ca:#aa1111;--cg:rgba(170,17,17,0.15)">
                         <div class="hero-card-inner">
                             <div class="hero-stats">
                                 <div class="hero-label">PENDING PROD.</div>
@@ -271,10 +271,11 @@
                                 <div class="order-id" x-text="o.id"></div>
                                 <div class="order-client" x-text="o.client"></div>
                                 <div class="order-date" x-text="o.date"></div>
-                                <div class="order-imp" x-text="o.imp"></div>
+                                <div class="order-imp">
+                                    <span class="imp-pill" :class="o.impClass" x-text="o.imp"></span>
+                                </div>
                                 <div>
                                     <div class="chip" :class="o.chipClass">
-                                        <div class="chip-dot"></div>
                                         <span x-text="o.chipLabel"></span>
                                     </div>
                                 </div>

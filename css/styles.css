@@ -746,7 +746,7 @@ h1 {
 
 .orders .hero-list-item {
     font-family: 'DM Mono', monospace;
-    font-size: clamp(0.7rem, 1.4vh, 0.95rem);
+    font-size: clamp(0.9rem, 1.8vh, 1.25rem);
     font-weight: 500;
     color: var(--text);
     display: flex;
@@ -755,7 +755,7 @@ h1 {
 }
 
 .orders .hero-list-icon {
-    font-size: 0.7em;
+    font-size: 0.85em;
     color: var(--ca);
     flex-shrink: 0;
 }
@@ -887,50 +887,68 @@ h1 {
     text-transform: uppercase
 }
 
+.orders .imp-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 12px;
+    padding: 3px 12px;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+    text-transform: capitalize;
+}
+
+.orders .pill-maxima {
+    background-color: #1a7b4f;
+    color: #c0ebd4;
+}
+
+.orders .pill-alta {
+    background-color: #d1ecc4;
+    color: #1a7b4f;
+}
+
+.orders .pill-normal {
+    background-color: #f7cdcb;
+    color: #a91f24;
+}
+
+.orders .pill-baja {
+    background-color: #aa1111;
+    color: #fcebeb;
+}
+
 .orders .chip {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 4px 14px;
-    border-radius: 100px;
-    font-family: 'DM Mono', monospace;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-family: inherit;
     font-size: clamp(0.7rem, 1.4vh, 0.9rem);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border: 1px solid
+    font-weight: 500;
+    text-transform: capitalize;
+    border: none;
 }
 
 .orders .chip-ship {
-    background: transparent;
-    color: var(--amber);
-    border-color: rgba(217, 119, 6, .5)
+    background: #d1ecc4;
+    color: #1a7b4f;
 }
 
 .orders .chip-prod {
-    background: transparent;
-    color: var(--amber);
-    border-color: rgba(217, 119, 6, .5)
+    background: #f7cdcb;
+    color: #a91f24;
 }
 
 .orders .chip-pend {
-    background: transparent;
-    color: var(--amber);
-    border-color: rgba(217, 119, 6, .5)
+    background: #aa1111;
+    color: #ffffff;
 }
 
 .orders .chip-done {
-    background: transparent;
-    color: var(--amber);
-    border-color: rgba(217, 119, 6, .5)
-}
-
-.orders .chip-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor
+    background: #1a7b4f;
+    color: #ffffff;
 }
 
 .orders .empty-table {

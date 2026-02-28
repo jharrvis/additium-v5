@@ -233,35 +233,45 @@ function spaDashboard() {
 
         // ─── Screen 02: ORDERS ──────────────────────────────────────────────────────
         processOrders(rows) {
-            const COLS = { id: 0, client: 1, tarea: 2, importance: 3, status: 4, date: 5 };
+            const COLS = { id: 0, client: 1, date: 2, importance: 3, status: 4 };
             const CAT_ORDER = { shipping: 0, production: 1, pending: 2, done: 3 };
-            const valid = rows.filter(r => (r[COLS.id] || '').trim());
+            const valid = rows.filter((r, i) => i > 0 && (r[COLS.id] || '').trim() !== '' && !(r[COLS.id] || '').toLowerCase().includes('pedido'));
             let shipCount = 0, prodCount = 0, pendCount = 0;
 
             const items = valid.map(r => {
-                const st = (r[COLS.status] || '').toUpperCase().trim();
+                const rawStatus = (r[COLS.status] || '—').trim();
+                const stUpper = rawStatus.toUpperCase();
                 let cat = 'pending';
-                if (st.includes('SHIP') || st.includes('ENVIO') || st.includes('DESPACHO') || this.isToday(r[COLS.date])) cat = 'shipping';
-                else if (st.includes('FABRICANDO') || st.includes('CURSO') || st.includes('PRODUC') || st.includes('MAKING')) cat = 'production';
-                else if (CONFIG.doneStatuses.includes(st)) cat = 'done';
+                if (stUpper.includes('ENVIAD') || CONFIG.doneStatuses.includes(stUpper)) cat = 'done';
+                else if (stUpper.includes('LISTO') || stUpper.includes('SHIP') || stUpper.includes('DESPACHO') || this.isToday(r[COLS.date])) cat = 'shipping';
+                else if (stUpper.includes('FABRICAN') || stUpper.includes('CURSO') || stUpper.includes('PRODUC')) cat = 'production';
+                else if (stUpper.includes('POR FAB') || stUpper.includes('PEND')) cat = 'pending';
                 if (cat === 'shipping') shipCount++; else if (cat === 'production') prodCount++; else if (cat === 'pending') pendCount++;
                 const d = this.parseDate(r[COLS.date]);
                 const dl = d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : (r[COLS.date] || '—');
                 const chips = {
-                    shipping: { cls: 'chip-ship', lbl: 'SHIPPING' },
-                    production: { cls: 'chip-prod', lbl: 'IN PROD.' },
-                    pending: { cls: 'chip-pend', lbl: 'PENDING' },
-                    done: { cls: 'chip-done', lbl: 'DONE' }
+                    shipping: { cls: 'chip-ship' },
+                    production: { cls: 'chip-prod' },
+                    pending: { cls: 'chip-pend' },
+                    done: { cls: 'chip-done' }
                 };
+                const rawImp = (r[COLS.importance] || '—').trim();
+                const impUpper = rawImp.toUpperCase();
+                let impPillClass = '';
+                if (impUpper.includes('XIM') || impUpper.includes('MAX')) impPillClass = 'pill-maxima';
+                else if (impUpper.includes('ALTA')) impPillClass = 'pill-alta';
+                else if (impUpper.includes('NORMAL')) impPillClass = 'pill-normal';
+                else if (impUpper.includes('BAJA')) impPillClass = 'pill-baja';
+
                 return {
                     id: r[COLS.id] || '—',
                     client: r[COLS.client] || '—',
-                    tarea: r[COLS.tarea] || '—',
                     date: dl,
-                    imp: (r[COLS.importance] || '—').toUpperCase(),
+                    imp: impUpper !== '—' ? rawImp : '—',
+                    impClass: impPillClass,
                     cat,
                     chipClass: chips[cat].cls,
-                    chipLabel: chips[cat].lbl
+                    chipLabel: rawStatus
                 };
             });
 
