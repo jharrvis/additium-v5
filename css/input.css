@@ -1,0 +1,281 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== CUSTOM STYLES THAT CANNOT BE UTILITY-FIRST ===== */
+
+/* Grid background overlay */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+}
+
+/* Hero card gradient overlay */
+.orders .hero-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle at top right, var(--cg) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Nav button home separator */
+.nav-btn[title="Home"]::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 20%;
+    bottom: 20%;
+    width: 1px;
+    background: var(--border);
+}
+
+/* Task deadline icon */
+.todo .task-deadline::before {
+    content: '🕒';
+    font-size: 0.9em;
+}
+
+/* Screen fade transitions */
+.screen-fade-enter {
+    opacity: 0;
+    transform: scale(0.98);
+}
+
+.screen-fade-enter-active {
+    transition: all 0.5s ease-out;
+}
+
+.screen-fade-exit {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.screen-fade-exit-active {
+    opacity: 0;
+    transform: scale(1.02);
+    transition: all 0.5s ease-in;
+}
+
+/* Imp pill colors */
+.pill-maxima {
+    background-color: #1a7b4f;
+    color: #c0ebd4;
+}
+
+.pill-alta {
+    background-color: #d1ecc4;
+    color: #1a7b4f;
+}
+
+.pill-normal {
+    background-color: #f7cdcb;
+    color: #a91f24;
+}
+
+.pill-baja {
+    background-color: #aa1111;
+    color: #fcebeb;
+}
+
+/* Chip colors */
+.chip-ship {
+    background: #d1ecc4;
+    color: #1a7b4f;
+}
+
+.chip-prod {
+    background: #f7cdcb;
+    color: #a91f24;
+}
+
+.chip-pend {
+    background: #aa1111;
+    color: #ffffff;
+}
+
+.chip-done {
+    background: #1a7b4f;
+    color: #ffffff;
+}
+
+/* Event badge colors */
+.dep-badge.tomorrow {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--blue);
+}
+
+.dep-badge.soon {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--amber);
+}
+
+.dep-badge.normal {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--green);
+}
+
+/* Order row border colors */
+.orders .order-row.shipping {
+    border-left: 4px solid var(--amber);
+}
+
+.orders .order-row.production {
+    border-left: 4px solid var(--amber);
+}
+
+.orders .order-row.pending {
+    border-left: 4px solid var(--amber);
+}
+
+.orders .order-row.done {
+    border-left: 4px solid var(--green);
+    opacity: 0.6;
+}
+
+/* Page badge colors */
+.todo .page-badge {
+    color: var(--blue);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.orders .page-badge {
+    color: var(--green);
+    border: 1px solid rgba(5, 150, 105, 0.3);
+}
+
+.events .page-badge {
+    color: var(--amber);
+    border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+/* Spinner colors per page */
+.todo .spinner {
+    border-top-color: var(--blue);
+}
+
+.orders .spinner {
+    border-top-color: var(--green);
+}
+
+.events .spinner {
+    border-top-color: var(--amber);
+}
+
+/* Sync pill color transitions */
+.sync-pill {
+    transition: color 0.5s ease;
+}
+
+/* Sync fill transition and shadow */
+.sync-fill {
+    transition: width 1s linear, background 0.5s ease;
+    box-shadow: 0 0 6px currentColor;
+}
+
+.sync-fill.flash {
+    animation: flashFill 0.7s ease;
+}
+
+/* Nav button paused state */
+.nav-btn.paused {
+    color: var(--amber);
+    background: rgba(217, 119, 6, 0.1);
+}
+
+.nav-btn.paused:hover {
+    background: rgba(217, 119, 6, 0.15);
+}
+
+/* Nav button hover states */
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text);
+    transform: translateY(-1px);
+}
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+/* Hero value transition */
+.orders .hero-value {
+    transition: color 0.3s ease;
+}
+
+/* KPI value transition */
+.todo .kpi-value {
+    transition: color 0.4s ease;
+}
+
+/* Order row hover */
+.orders .order-row:hover {
+    background: var(--surface2);
+}
+
+/* Toast border left color via CSS variable */
+.toast {
+    border-left: 4px solid var(--tc, var(--blue));
+}
+
+/* Task card priority color via CSS variable */
+.todo .task-card {
+    border-left: 4px solid var(--prio-color, #444);
+}
+
+.todo .task-card.is-urgent {
+    border-left-width: 6px;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
+}
+
+/* Prio dot and label color via CSS variable */
+.todo .prio-dot {
+    background: var(--prio-color, #888);
+}
+
+.todo .prio-label {
+    color: var(--prio-color, #888);
+}
+
+/* Scrollbar styling - WebKit only */
+.todo .emp-tasks::-webkit-scrollbar,
+.todo .board::-webkit-scrollbar,
+.orders .hero-list::-webkit-scrollbar,
+.orders .table-body::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.todo .emp-tasks::-webkit-scrollbar-thumb,
+.todo .board::-webkit-scrollbar-thumb,
+.orders .hero-list::-webkit-scrollbar-thumb,
+.orders .table-body::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+}
+
+.todo .emp-tasks::-webkit-scrollbar {
+    width: 3px;
+}
+
+.orders .hero-list::-webkit-scrollbar {
+    width: 3px;
+}
+
+.orders .hero-list::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+}
+
+/* Auto scroll reset marker */
+[data-resetting] {
+    /* marker for JS auto-scroll reset */
+}

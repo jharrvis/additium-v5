@@ -1,0 +1,14 @@
+{
+  "name": "additium-v5",
+  "version": "5.0.0",
+  "description": "ADDITIUM 3D Dashboard",
+  "scripts": {
+    "build:css": "tailwindcss -i ./css/input.css -o ./css/styles.css --minify",
+    "watch:css": "tailwindcss -i ./css/input.css -o ./css/styles.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.17"
+  }
+}
