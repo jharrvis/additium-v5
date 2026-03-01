@@ -90,6 +90,12 @@
         /* ── Employee task count badge ────────────────────────── */
         html[data-theme="dark"] .emp-count { background: rgba(77,142,245,0.12) !important; }
 
+        /* ── Logo dark mode ─────────────────────────────────────── */
+        .logo-light { display: block; }
+        .logo-dark { display: none; }
+        html[data-theme="dark"] .logo-light { display: none; }
+        html[data-theme="dark"] .logo-dark { display: block; }
+
         /* ── Hero card accent variables ─────────────────────────
            Light mode defined via class (remove inline style from HTML).
            Dark mode: brighter/saturated accent colors.             */
@@ -292,7 +298,8 @@
             </div>
             <div class="live-clock font-mono text-clamp-clock text-text font-medium tracking-wide" x-text="clock"></div>
             <div class="logo-box cursor-pointer" @click="setScreen(1)">
-                <img src="img/logo_additium.png" alt="ADDITIUM 3D" class="h-[clamp(40px,6vh,70px)] object-contain">
+                <img src="img/logo_additium.svg" alt="ADDITIUM" class="h-[clamp(40px,6vh,70px)] object-contain logo-light">
+                <img src="img/logo_additium_dark.svg" alt="ADDITIUM" class="h-[clamp(40px,6vh,70px)] object-contain logo-dark">
             </div>
         </div>
     </header>
