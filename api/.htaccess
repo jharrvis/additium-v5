@@ -1,0 +1,11 @@
+# ADDITIUM 3D – Apache URL rewriting for /api directory
+# Routes /api/proxy → proxy.php (strips .php extension)
+# This file is ignored by Vercel — vercel.json handles routing there.
+
+Options -MultiViews
+RewriteEngine On
+
+# If the exact file doesn't exist but filename.php does, serve the .php file
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+)$ $1.php [L,QSA]

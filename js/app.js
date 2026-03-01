@@ -18,6 +18,7 @@ function spaDashboard() {
         refreshKey: 0,
         paused: false,
         isFullscreen: false,
+        usingFallback: false,
 
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
         orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0 },
@@ -155,13 +156,27 @@ function spaDashboard() {
         },
 
         async fetchSheet(sheetName) {
-            const url = getCsvUrl(sheetName) + '&t=' + Date.now();
-            const res = await fetch(url, {
-                cache: 'no-store',
-                headers: { 'Pragma': 'no-cache' },
-            });
-            if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${sheetName}`);
-            return res.text();
+            // Layer 1: proxy (fresh data, no CDN cache)
+            const proxyUrl = getCsvUrl(sheetName) + '&t=' + Date.now();
+            try {
+                const res = await fetch(proxyUrl, {
+                    cache: 'no-store',
+                    headers: { 'Pragma': 'no-cache' },
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.text();
+            } catch (proxyErr) {
+                // Layer 2: direct Google Sheets (data mungkin slightly stale dari CDN)
+                console.warn(`[proxy] ${proxyErr.message} — falling back to direct fetch`);
+                if (!this.usingFallback) {
+                    this.usingFallback = true;
+                    this.toast('⚠️', 'Mode Fallback', 'Proxy tidak tersedia — data diambil langsung dari Google Sheets (mungkin sedikit tidak terbaru)', '#d97706');
+                }
+                const fallbackUrl = CONFIG.spreadsheetBase + CONFIG.sheets[sheetName] + '&t=' + Date.now();
+                const res = await fetch(fallbackUrl);
+                if (!res.ok) throw new Error(`Fallback failed: HTTP ${res.status}`);
+                return res.text();
+            }
         },
 
         async fetchAllData() {
