@@ -1,0 +1,4 @@
+# These files are for local development (Laragon/Apache) only.
+# Vercel uses api/proxy.js (Node.js) instead — these are ignored at deploy time.
+api/proxy.php
+api/.htaccess

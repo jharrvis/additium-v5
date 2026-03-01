@@ -1,3 +1,5 @@
 .vercel
 node_modules/
 original/
+api/proxy.php
+api/.htaccess

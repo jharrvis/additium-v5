@@ -6,9 +6,8 @@
 function spaDashboard() {
     return {
         activeScreen: 1,
-        rotateCd: CONFIG.rotateInterval,
-        refreshCd: CONFIG.refreshInterval,
-        rotateIntervalCurrent: CONFIG.rotateInterval,
+        rotateCd: 45,
+        refreshCd: 30,
         clock: '--:--:--',
         dateStr: '--',
         lastSync: '--:--:--',
@@ -19,12 +18,28 @@ function spaDashboard() {
         paused: false,
         isFullscreen: false,
         usingFallback: false,
+        settingsOpen: false,
+        statusBarVisible: true,
+        _rotateCustom: false,
+        _refreshCustom: false,
+
+        settings: {
+            showCountdown: false,
+            rotateInterval: 45,
+            refreshInterval: 30,
+            autoHideStatusBar: false,
+            autoRotate: true,
+            clockFormat: '24h',
+        },
 
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
         orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0 },
         events: { today: [], upcoming: [], prevTodayCount: 0 },
 
         async init() {
+            this.loadSettings();
+            this.rotateCd = this.settings.rotateInterval;
+            this.refreshCd = this.settings.refreshInterval;
             this.startClock();
             await this.fetchAllData();
             this.loading = false;
@@ -32,12 +47,20 @@ function spaDashboard() {
             this.startRefreshTimer();
             this.initAutoScroll();
             this.initFullscreenListener();
+            this.$watch(() => JSON.stringify(this.settings), () => {
+                localStorage.setItem('additium_v5_settings', JSON.stringify(this.settings));
+            });
+            if (this.settings.autoHideStatusBar) {
+                setTimeout(() => { this.statusBarVisible = false; }, 3000);
+            }
         },
 
         startClock() {
             const tick = () => {
                 const n = new Date();
-                this.clock = n.toLocaleTimeString('en-GB');
+                this.clock = this.settings.clockFormat === '12h'
+                    ? n.toLocaleTimeString('en-US', { hour12: true })
+                    : n.toLocaleTimeString('en-GB');
                 this.dateStr = n.toLocaleDateString('en-GB', {
                     weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
                 }).toUpperCase();
@@ -48,10 +71,10 @@ function spaDashboard() {
 
         startRotation() {
             setInterval(() => {
-                if (!this.paused) {
+                if (!this.paused && this.settings.autoRotate) {
                     this.rotateCd--;
                     if (this.rotateCd <= 0) {
-                        this.rotateCd = CONFIG.rotateInterval;
+                        this.rotateCd = this.settings.rotateInterval;
                         this.nextScreen();
                     }
                 }
@@ -62,7 +85,7 @@ function spaDashboard() {
             setInterval(() => {
                 this.refreshCd--;
                 if (this.refreshCd <= 0) {
-                    this.refreshCd = CONFIG.refreshInterval;
+                    this.refreshCd = this.settings.refreshInterval;
                     this.fetchAllData();
                 }
             }, 1000);
@@ -89,20 +112,59 @@ function spaDashboard() {
 
         nextScreen() { this.activeScreen = (this.activeScreen % CONFIG.screens.length) + 1; },
         prevScreen() { this.activeScreen = this.activeScreen <= 1 ? CONFIG.screens.length : this.activeScreen - 1; },
-        setScreen(id) { this.activeScreen = id; this.rotateCd = CONFIG.rotateInterval; },
-        togglePause() { this.paused = !this.paused; if (!this.paused) this.rotateCd = CONFIG.rotateInterval; },
+        setScreen(id) { this.activeScreen = id; this.rotateCd = this.settings.rotateInterval; },
+        togglePause() { this.paused = !this.paused; if (!this.paused) this.rotateCd = this.settings.rotateInterval; },
 
         setRotateInterval(sec) {
-            CONFIG.rotateInterval = sec;
-            this.rotateIntervalCurrent = sec;
+            this.settings.rotateInterval = sec;
             this.rotateCd = sec;
+        },
+
+        setRefreshInterval(sec) {
+            this.settings.refreshInterval = sec;
+            this.refreshCd = sec;
+        },
+
+        loadSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('additium_v5_settings') || '{}');
+                Object.assign(this.settings, saved);
+            } catch (e) { /* ignore corrupt storage */ }
+        },
+
+        resetSettings() {
+            Object.assign(this.settings, {
+                showCountdown: false,
+                rotateInterval: 45,
+                refreshInterval: 30,
+                autoHideStatusBar: false,
+                autoRotate: true,
+                clockFormat: '24h',
+            });
+            this.rotateCd = 45;
+            this.refreshCd = 30;
+            this.statusBarVisible = true;
+            this._rotateCustom = false;
+            this._refreshCustom = false;
+            localStorage.removeItem('additium_v5_settings');
+        },
+
+        sbEnter() {
+            clearTimeout(this._sbTimer);
+            this.statusBarVisible = true;
+        },
+
+        sbLeave() {
+            if (this.settings.autoHideStatusBar && !this.settingsOpen) {
+                this._sbTimer = setTimeout(() => { this.statusBarVisible = false; }, 1500);
+            }
         },
 
         toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
+                document.documentElement.requestFullscreen().catch(() => { });
             } else {
-                document.exitFullscreen().catch(() => {});
+                document.exitFullscreen().catch(() => { });
             }
         },
 
@@ -112,7 +174,7 @@ function spaDashboard() {
             });
         },
 
-        get rotatePct() { return (this.rotateCd / CONFIG.rotateInterval) * 100; },
+        get rotatePct() { return (this.rotateCd / this.settings.rotateInterval) * 100; },
         get syncColor() { return this.refreshCd <= 8 ? 'var(--red)' : this.refreshCd <= 18 ? 'var(--amber)' : 'var(--green)'; },
         pad(n) { return String(n).padStart(2, '0'); },
 
@@ -170,7 +232,7 @@ function spaDashboard() {
                 console.warn(`[proxy] ${proxyErr.message} — falling back to direct fetch`);
                 if (!this.usingFallback) {
                     this.usingFallback = true;
-                    this.toast('⚠️', 'Mode Fallback', 'Proxy tidak tersedia — data diambil langsung dari Google Sheets (mungkin sedikit tidak terbaru)', '#d97706');
+                    this.toast('⚠️', 'Mode Fallback', 'Proxy not available — data pulled directly from Google Sheets (may be slightly out of date)', '#d97706');
                 }
                 const fallbackUrl = CONFIG.spreadsheetBase + CONFIG.sheets[sheetName] + '&t=' + Date.now();
                 const res = await fetch(fallbackUrl);

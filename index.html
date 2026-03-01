@@ -14,9 +14,7 @@
     <script src="js/app.js?v=9"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
+        [x-cloak] { display: none !important; }
 
         .master-wrap {
             height: 100vh;
@@ -37,6 +35,201 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* ── Status bar auto-hide ──────────────────────────────── */
+        .status-bar {
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .sb-trigger {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 16px;
+            z-index: 50;
+        }
+
+        /* ── Settings modal ────────────────────────────────────── */
+        .settings-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .settings-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.30);
+            backdrop-filter: blur(3px);
+        }
+        .settings-card {
+            position: relative;
+            z-index: 10;
+            background: var(--surface);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14);
+            width: 480px;
+            max-width: 93vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 18px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 10;
+            border-radius: 18px 18px 0 0;
+        }
+        .settings-body {
+            padding: 0 24px 4px;
+        }
+        .settings-section {
+            padding: 18px 0 4px;
+            border-top: 1px solid var(--border);
+        }
+        .settings-section:first-child {
+            border-top: none;
+            padding-top: 16px;
+        }
+        .settings-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            margin-bottom: 6px;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 10px 0;
+        }
+        .settings-row + .settings-row {
+            border-top: 1px solid rgba(0,0,0,0.04);
+        }
+        .settings-row-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.3;
+        }
+        .settings-row-desc {
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* Toggle switch */
+        .tog {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s ease;
+            outline: none;
+        }
+        .tog-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 999px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            transition: transform 0.2s ease;
+        }
+        .tog.on  { background: var(--blue); }
+        .tog.off { background: var(--border); }
+        .tog.on .tog-thumb { transform: translateX(18px); }
+
+        /* Interval pill buttons */
+        .i-pills { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+        .i-pill {
+            padding: 5px 11px;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            line-height: 1;
+        }
+        .i-pill:hover { border-color: rgba(0,0,0,0.2); color: var(--text); }
+        .i-pill.on { background: var(--blue); color: white; border-color: var(--blue); }
+
+        /* Settings number input */
+        .s-input {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--text);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            outline: none;
+            width: 82px;
+            transition: border-color 0.2s;
+        }
+        .s-input:focus { border-color: var(--blue); }
+
+        /* Gear button active state */
+        .nav-btn.gear-open { color: var(--blue); background: rgba(37,99,235,0.08); }
+
+        /* Settings footer */
+        .settings-footer {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+        }
+        .reset-btn {
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .reset-btn:hover { color: var(--red); background: rgba(220,38,38,0.06); }
+
+        /* Close button */
+        .settings-close {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--muted);
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .settings-close:hover { background: rgba(0,0,0,0.06); color: var(--text); }
     </style>
 </head>
 
@@ -409,7 +602,9 @@
     </div><!-- /screen-container -->
 
     <!-- STATUS BAR -->
-    <div class="status-bar flex-shrink-0 mt-[1.5vh] relative z-[1]">
+    <div class="status-bar flex-shrink-0 mt-[1.5vh] relative z-[1]"
+         :style="settings.autoHideStatusBar && !statusBarVisible ? 'opacity:0;transform:translateY(6px);pointer-events:none' : ''"
+         @mouseenter="sbEnter()" @mouseleave="sbLeave()">
         <div class="sync-track h-[3px] bg-[rgba(0,0,0,0.05)] mb-[1.2vh] overflow-hidden rounded-[2px]">
             <div class="sync-fill h-full rounded-[2px]" :class="{flash:synced}"
                 :style="`width:${rotatePct}%;background:var(--blue)`"></div>
@@ -482,6 +677,18 @@
                         <line x1="21" y1="3" x2="14" y2="10"></line>
                     </svg>
                 </button>
+                <!-- Separator -->
+                <div class="w-px bg-border flex-shrink-0" style="height:60%;margin:0 2px"></div>
+                <!-- Settings (Gear) button -->
+                <button
+                    class="nav-btn flex items-center justify-center w-[42px] h-[42px] border-none bg-transparent rounded-[8px] cursor-pointer text-muted transition-all duration-200 ease-cubic hover:bg-[rgba(0,0,0,0.05)] hover:text-text hover:-translate-y-[1px] active:scale-95"
+                    :class="settingsOpen ? 'gear-open' : ''"
+                    @click="settingsOpen=true" title="Pengaturan">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path>
+                    </svg>
+                </button>
             </div>
 
             <!-- Screen selector dropdown -->
@@ -500,20 +707,177 @@
                 <span class="text-muted">ROTATE</span>
                 <select class="status-select"
                     @change="setRotateInterval(parseInt($event.target.value))">
-                    <option value="15" :selected="rotateIntervalCurrent===15">15S</option>
-                    <option value="30" :selected="rotateIntervalCurrent===30">30S</option>
-                    <option value="45" :selected="rotateIntervalCurrent===45">45S</option>
-                    <option value="60" :selected="rotateIntervalCurrent===60">60S</option>
-                    <option value="90" :selected="rotateIntervalCurrent===90">90S</option>
-                    <option value="120" :selected="rotateIntervalCurrent===120">120S</option>
+                    <option value="15" :selected="settings.rotateInterval===15">15S</option>
+                    <option value="30" :selected="settings.rotateInterval===30">30S</option>
+                    <option value="45" :selected="settings.rotateInterval===45">45S</option>
+                    <option value="60" :selected="settings.rotateInterval===60">60S</option>
+                    <option value="90" :selected="settings.rotateInterval===90">90S</option>
+                    <option value="120" :selected="settings.rotateInterval===120">120S</option>
                 </select>
-                <span>· NEXT IN <b class="font-semibold text-blue" x-text="rotateCd+'s'"></b></span>
+                <span x-show="settings.showCountdown">· NEXT IN <b class="font-semibold text-blue" x-text="rotateCd+'s'"></b></span>
             </div>
 
             <!-- Refresh countdown -->
-            <div class="flex-shrink-0">REFRESH IN <b :style="`color:${syncColor}`" x-text="refreshCd+'S'"></b></div>
+            <div class="flex-shrink-0" x-show="settings.showCountdown">REFRESH IN <b :style="`color:${syncColor}`" x-text="refreshCd+'S'"></b></div>
         </div>
     </div>
+
+    <!-- BOTTOM HOVER TRIGGER (auto-hide status bar) -->
+    <div class="sb-trigger" x-show="settings.autoHideStatusBar && !statusBarVisible"
+         @mouseenter="sbEnter()"></div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="settings-backdrop" x-show="settingsOpen" x-cloak
+         @keydown.escape.window="settingsOpen=false">
+        <div class="settings-overlay" @click="settingsOpen=false"></div>
+        <div class="settings-card">
+
+            <!-- Header -->
+            <div class="settings-header">
+                <div>
+                    <div style="font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text)">Pengaturan</div>
+                    <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:3px">Tersimpan otomatis di browser ini</div>
+                </div>
+                <button class="settings-close" @click="settingsOpen=false">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="settings-body">
+
+                <!-- ── TAMPILAN ─────────────────────────── -->
+                <div class="settings-section">
+                    <div class="settings-section-label">Tampilan</div>
+
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Timer Countdown</div>
+                            <div class="settings-row-desc">Tampilkan "NEXT IN" dan "REFRESH IN" di status bar</div>
+                        </div>
+                        <button class="tog" :class="settings.showCountdown ? 'on' : 'off'"
+                                @click="settings.showCountdown=!settings.showCountdown">
+                            <span class="tog-thumb"></span>
+                        </button>
+                    </div>
+
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Format Jam</div>
+                            <div class="settings-row-desc">Tampilan jam di header</div>
+                        </div>
+                        <div class="i-pills">
+                            <button class="i-pill" :class="settings.clockFormat==='24h' ? 'on' : ''"
+                                    @click="settings.clockFormat='24h'">24H</button>
+                            <button class="i-pill" :class="settings.clockFormat==='12h' ? 'on' : ''"
+                                    @click="settings.clockFormat='12h'">12H</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── AUTO ROTASI ──────────────────────── -->
+                <div class="settings-section">
+                    <div class="settings-section-label">Auto Rotasi Halaman</div>
+
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Auto Rotasi</div>
+                            <div class="settings-row-desc">Pindah halaman otomatis setiap interval</div>
+                        </div>
+                        <button class="tog" :class="settings.autoRotate ? 'on' : 'off'"
+                                @click="settings.autoRotate=!settings.autoRotate">
+                            <span class="tog-thumb"></span>
+                        </button>
+                    </div>
+
+                    <div class="settings-row" :style="settings.autoRotate ? '' : 'opacity:0.38;pointer-events:none'">
+                        <div>
+                            <div class="settings-row-label">Interval Rotasi</div>
+                            <div class="settings-row-desc">Saat ini: <b x-text="settings.rotateInterval + 'S'"></b></div>
+                        </div>
+                        <div>
+                            <div class="i-pills">
+                                <button class="i-pill" :class="settings.rotateInterval===30&&!_rotateCustom ? 'on' : ''"
+                                        @click="setRotateInterval(30);_rotateCustom=false">30S</button>
+                                <button class="i-pill" :class="settings.rotateInterval===45&&!_rotateCustom ? 'on' : ''"
+                                        @click="setRotateInterval(45);_rotateCustom=false">45S</button>
+                                <button class="i-pill" :class="settings.rotateInterval===60&&!_rotateCustom ? 'on' : ''"
+                                        @click="setRotateInterval(60);_rotateCustom=false">1MIN</button>
+                                <button class="i-pill" :class="settings.rotateInterval===120&&!_rotateCustom ? 'on' : ''"
+                                        @click="setRotateInterval(120);_rotateCustom=false">2MIN</button>
+                                <button class="i-pill" :class="_rotateCustom ? 'on' : ''"
+                                        @click="_rotateCustom=!_rotateCustom">CUSTOM</button>
+                            </div>
+                            <div x-show="_rotateCustom" style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                                <input type="number" min="5" max="3600" class="s-input"
+                                       :value="settings.rotateInterval"
+                                       @change="setRotateInterval(Math.max(5, parseInt($event.target.value)||45))">
+                                <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)">detik</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── REFRESH DATA ─────────────────────── -->
+                <div class="settings-section">
+                    <div class="settings-section-label">Refresh Data</div>
+
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Interval Refresh</div>
+                            <div class="settings-row-desc">Saat ini: <b x-text="settings.refreshInterval + 'S'"></b></div>
+                        </div>
+                        <div>
+                            <div class="i-pills">
+                                <button class="i-pill" :class="settings.refreshInterval===15&&!_refreshCustom ? 'on' : ''"
+                                        @click="setRefreshInterval(15);_refreshCustom=false">15S</button>
+                                <button class="i-pill" :class="settings.refreshInterval===30&&!_refreshCustom ? 'on' : ''"
+                                        @click="setRefreshInterval(30);_refreshCustom=false">30S</button>
+                                <button class="i-pill" :class="settings.refreshInterval===60&&!_refreshCustom ? 'on' : ''"
+                                        @click="setRefreshInterval(60);_refreshCustom=false">1MIN</button>
+                                <button class="i-pill" :class="settings.refreshInterval===120&&!_refreshCustom ? 'on' : ''"
+                                        @click="setRefreshInterval(120);_refreshCustom=false">2MIN</button>
+                                <button class="i-pill" :class="_refreshCustom ? 'on' : ''"
+                                        @click="_refreshCustom=!_refreshCustom">CUSTOM</button>
+                            </div>
+                            <div x-show="_refreshCustom" style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                                <input type="number" min="10" max="3600" class="s-input"
+                                       :value="settings.refreshInterval"
+                                       @change="setRefreshInterval(Math.max(10, parseInt($event.target.value)||30))">
+                                <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)">detik</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STATUS BAR ───────────────────────── -->
+                <div class="settings-section">
+                    <div class="settings-section-label">Status Bar</div>
+
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Auto-Hide Status Bar</div>
+                            <div class="settings-row-desc">Sembunyikan otomatis · muncul saat hover bagian bawah layar</div>
+                        </div>
+                        <button class="tog" :class="settings.autoHideStatusBar ? 'on' : 'off'"
+                                @click="settings.autoHideStatusBar=!settings.autoHideStatusBar; if(!settings.autoHideStatusBar) statusBarVisible=true">
+                            <span class="tog-thumb"></span>
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /settings-body -->
+
+            <!-- Footer -->
+            <div class="settings-footer">
+                <button class="reset-btn" @click="resetSettings()">↺ Reset ke Default</button>
+            </div>
+
+        </div><!-- /settings-card -->
+    </div><!-- /settings-backdrop -->
 
 </body>
 
