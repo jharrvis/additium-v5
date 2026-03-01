@@ -10,226 +10,202 @@
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=11">
-    <script src="js/config.js?v=9"></script>
-    <script src="js/app.js?v=9"></script>
+    <script src="js/config.js?v=10"></script>
+    <script src="js/app.js?v=10"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <style>
         [x-cloak] { display: none !important; }
 
+        /* ── Layout ────────────────────────────────────────────────── */
         .master-wrap {
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
+        .screen-container { flex: 1; position: relative; overflow: hidden; }
+        .screen-slot { position: absolute; inset: 0; display: flex; flex-direction: column; }
 
-        .screen-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
+        /* ── Dark mode ─────────────────────────────────────────────── */
+        html[data-theme="dark"] {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #252938;
+            --border: rgba(255,255,255,0.07);
+            --text: #e8eaf0;
+            --muted: rgba(232,234,240,0.45);
+            --blue: #4d8ef5;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --purple: #a78bfa;
         }
+        html[data-theme="dark"] body::before {
+            background-image: linear-gradient(rgba(77,142,245,.03) 1px, transparent 0),
+                              linear-gradient(90deg, rgba(77,142,245,.03) 1px, transparent 0);
+        }
+        html[data-theme="dark"] .hover\:bg-\[rgba\(0\2c 0\2c 0\2c 0\.05\)\]:hover,
+        html[data-theme="dark"] .nav-btn:hover { background: rgba(255,255,255,0.07) !important; }
+        html[data-theme="dark"] .bg-\[rgba\(0\2c 0\2c 0\2c 0\.05\)\] { background-color: rgba(255,255,255,0.05) !important; }
+        html[data-theme="dark"] .sync-track { background: rgba(255,255,255,0.06) !important; }
+        html[data-theme="dark"] .empty-board,
+        html[data-theme="dark"] .empty-table { color: rgba(255,255,255,0.12) !important; }
+        html[data-theme="dark"] .text-\[rgba\(0\2c 0\2c 0\2c 0\.1\)\],
+        html[data-theme="dark"] .text-\[rgba\(0\2c 0\2c 0\2c 0\.15\)\] { color: rgba(255,255,255,0.12) !important; }
+        html[data-theme="dark"] .task-deadline { background: rgba(248,113,113,0.08) !important; }
+        html[data-theme="dark"] .settings-close:hover,
+        html[data-theme="dark"] .tog.off { background: rgba(255,255,255,0.1) !important; }
+        html[data-theme="dark"] .i-pill:hover { border-color: rgba(255,255,255,0.25) !important; }
+        html[data-theme="dark"] .settings-row + .settings-row { border-color: rgba(255,255,255,0.05) !important; }
+        html[data-theme="dark"] .settings-col-divider { background: rgba(255,255,255,0.06) !important; }
 
-        .screen-slot {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-        }
+        /* ── Modern rounded cards ──────────────────────────────────── */
+        .emp-col          { border-radius: 16px; overflow: hidden; }
+        .emp-header       { border-radius: 16px 16px 0 0; }
+        .task-card        { border-radius: 12px !important; }
+        .hero-card        { border-radius: 16px; }
+        .table-section    { border-radius: 16px; overflow: hidden; }
+        .table-header     { border-radius: 16px 16px 0 0; }
+        .event-card-today { border-radius: 14px; }
+        .toast            { border-radius: 14px; }
+        .settings-card    { border-radius: 20px; }
 
-        /* ── Status bar auto-hide ──────────────────────────────── */
-        .status-bar {
-            transition: opacity 0.35s ease, transform 0.35s ease;
-        }
-        .sb-trigger {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 16px;
-            z-index: 50;
-        }
+        /* ── Status bar auto-hide ──────────────────────────────────── */
+        .status-bar { transition: opacity 0.35s ease, transform 0.35s ease; }
+        .sb-trigger { position: fixed; bottom: 0; left: 0; right: 0; height: 16px; z-index: 50; }
 
-        /* ── Settings modal ────────────────────────────────────── */
+        /* ── Settings modal ────────────────────────────────────────── */
         .settings-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
         }
         .settings-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.30);
-            backdrop-filter: blur(3px);
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(4px);
         }
         .settings-card {
-            position: relative;
-            z-index: 10;
+            position: relative; z-index: 10;
             background: var(--surface);
-            border-radius: 18px;
+            border-radius: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14);
-            width: 480px;
-            max-width: 93vw;
-            max-height: 90vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.18);
+            width: 720px; max-width: 95vw; max-height: 92vh;
+            overflow-y: auto; scrollbar-width: thin;
         }
         .settings-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 28px 20px;
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: var(--surface);
-            z-index: 10;
-            border-radius: 18px 18px 0 0;
+            position: sticky; top: 0; background: var(--surface); z-index: 10;
+            border-radius: 20px 20px 0 0; gap: 16px;
         }
         .settings-body {
-            padding: 0 24px 4px;
+            padding: 0 28px 8px;
+            display: grid;
+            grid-template-columns: 1fr 1px 1fr;
+            gap: 0 0;
         }
-        .settings-section {
-            padding: 18px 0 4px;
+        .settings-col { padding: 20px 0; }
+        .settings-col-right { padding: 20px 0 20px 28px; }
+        .settings-col-left  { padding: 20px 28px 20px 0; }
+        .settings-col-divider {
+            width: 1px; background: var(--border); margin: 20px 0;
+        }
+        .settings-full {
+            grid-column: 1 / -1;
+            padding: 20px 0 4px;
             border-top: 1px solid var(--border);
         }
-        .settings-section:first-child {
-            border-top: none;
-            padding-top: 16px;
-        }
+        .settings-section { margin-bottom: 20px; }
         .settings-section-label {
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 11px; font-weight: 700;
             font-family: 'DM Mono', monospace;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            margin-bottom: 6px;
+            color: var(--muted); text-transform: uppercase;
+            letter-spacing: 0.14em; margin-bottom: 12px;
         }
         .settings-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 10px 0;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 12px; padding: 11px 0;
         }
-        .settings-row + .settings-row {
-            border-top: 1px solid rgba(0,0,0,0.04);
-        }
+        .settings-row + .settings-row { border-top: 1px solid rgba(0,0,0,0.05); }
         .settings-row-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-            line-height: 1.3;
+            font-size: 15px; font-weight: 600;
+            color: var(--text); line-height: 1.3;
         }
         .settings-row-desc {
-            font-size: 11px;
-            font-family: 'DM Mono', monospace;
-            color: var(--muted);
-            margin-top: 2px;
+            font-size: 12px; font-family: 'DM Mono', monospace;
+            color: var(--muted); margin-top: 3px; line-height: 1.4;
         }
-
         /* Toggle switch */
         .tog {
-            position: relative;
-            width: 40px;
-            height: 22px;
-            border-radius: 999px;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: background 0.2s ease;
-            outline: none;
+            position: relative; width: 44px; height: 24px;
+            border-radius: 999px; border: none; cursor: pointer;
+            flex-shrink: 0; transition: background 0.2s ease; outline: none;
         }
         .tog-thumb {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 999px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            position: absolute; top: 3px; left: 3px;
+            width: 18px; height: 18px; background: white;
+            border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
             transition: transform 0.2s ease;
         }
         .tog.on  { background: var(--blue); }
         .tog.off { background: var(--border); }
-        .tog.on .tog-thumb { transform: translateX(18px); }
-
-        /* Interval pill buttons */
-        .i-pills { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+        .tog.on .tog-thumb { transform: translateX(20px); }
+        /* Interval pills */
+        .i-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
         .i-pill {
-            padding: 5px 11px;
-            font-size: 11px;
+            padding: 6px 13px; font-size: 12px;
             font-family: 'DM Mono', monospace;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            line-height: 1;
+            border-radius: 8px; border: 1px solid var(--border);
+            color: var(--muted); background: transparent;
+            cursor: pointer; transition: all 0.15s ease; line-height: 1;
         }
-        .i-pill:hover { border-color: rgba(0,0,0,0.2); color: var(--text); }
+        .i-pill:hover { border-color: rgba(0,0,0,0.22); color: var(--text); }
         .i-pill.on { background: var(--blue); color: white; border-color: var(--blue); }
-
         /* Settings number input */
         .s-input {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            color: var(--text);
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 6px 10px;
-            outline: none;
-            width: 82px;
+            font-family: 'DM Mono', monospace; font-size: 13px;
+            color: var(--text); background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 7px 12px; outline: none; width: 88px;
             transition: border-color 0.2s;
         }
         .s-input:focus { border-color: var(--blue); }
-
-        /* Gear button active state */
+        /* Lang pills */
+        .lang-pills { display: flex; gap: 4px; }
+        .lang-pill {
+            padding: 5px 14px; font-size: 12px; font-weight: 700;
+            font-family: 'DM Mono', monospace;
+            border-radius: 8px; border: 1px solid var(--border);
+            color: var(--muted); background: transparent;
+            cursor: pointer; transition: all 0.15s ease;
+            letter-spacing: 0.05em;
+        }
+        .lang-pill.on { background: var(--text); color: var(--surface); border-color: var(--text); }
+        /* Gear button active */
         .nav-btn.gear-open { color: var(--blue); background: rgba(37,99,235,0.08); }
-
         /* Settings footer */
         .settings-footer {
-            padding: 14px 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: flex-end;
+            padding: 16px 28px; border-top: 1px solid var(--border);
+            display: flex; justify-content: flex-end;
         }
         .reset-btn {
-            font-size: 11px;
-            font-family: 'DM Mono', monospace;
-            color: var(--muted);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
+            font-size: 12px; font-family: 'DM Mono', monospace;
+            color: var(--muted); background: transparent;
+            border: none; cursor: pointer;
+            padding: 5px 10px; border-radius: 6px;
             transition: color 0.15s, background 0.15s;
         }
-        .reset-btn:hover { color: var(--red); background: rgba(220,38,38,0.06); }
-
+        .reset-btn:hover { color: var(--red); background: rgba(220,38,38,0.07); }
         /* Close button */
         .settings-close {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            color: var(--muted);
-            transition: all 0.15s;
-            flex-shrink: 0;
+            width: 32px; height: 32px; display: flex;
+            align-items: center; justify-content: center;
+            border-radius: 8px; border: none; background: transparent;
+            cursor: pointer; color: var(--muted); transition: all 0.15s; flex-shrink: 0;
         }
-        .settings-close:hover { background: rgba(0,0,0,0.06); color: var(--text); }
+        .settings-close:hover { background: rgba(0,0,0,0.07); color: var(--text); }
     </style>
 </head>
 
@@ -254,16 +230,16 @@
     <header class="flex justify-between items-center mb-[2.5vh] flex-shrink-0 relative z-[1]">
         <div class="header-left flex items-baseline gap-[2vw]">
             <h1 class="text-clamp-h1 font-bold tracking-tighter leading-none uppercase"
-                x-text="CONFIG.screens[activeScreen-1].title">DASHBOARD</h1>
+                x-text="t('screen'+activeScreen)">DASHBOARD</h1>
             <span class="page-badge font-mono text-clamp-badge tracking-widest px-[14px] py-[5px] rounded-[100px]"
                 :class="{todo:activeScreen===1, orders:activeScreen===2, events:activeScreen===3}"
-                x-text="CONFIG.screens[activeScreen-1].badge"></span>
+                x-text="t('badge'+activeScreen)"></span>
         </div>
         <div class="header-right flex items-center gap-[2vw]">
             <div class="sync-pill flex items-center gap-2 font-mono text-clamp-sync py-[7px] px-4 border border-current rounded-[100px] whitespace-nowrap font-medium"
                 :style="`color:${syncColor}`">
                 <div class="sync-pip w-2 h-2 rounded-full bg-current animate-blink flex-shrink-0"></div>
-                <span x-text="synced ? 'SYNCED ✓' : `SYNC IN ${refreshCd}S`"></span>
+                <span x-text="synced ? t('syncedLabel') : t('syncIn')+' '+refreshCd+'S'"></span>
             </div>
             <div class="live-clock font-mono text-clamp-clock text-text font-medium tracking-wide" x-text="clock"></div>
             <div class="logo-box cursor-pointer" @click="setScreen(1)">
@@ -286,7 +262,7 @@
                 <div class="loading-state flex items-center justify-center flex-1 flex-col gap-[2vh] font-mono text-muted"
                     x-show="loading">
                     <div class="spinner w-10 h-10 border-[3px] border-border rounded-full animate-spin"></div>
-                    <span>FETCHING TODO DATA…</span>
+                    <span x-text="t('loading')"></span>
                 </div>
 
                 <!-- Kanban board -->
@@ -294,8 +270,8 @@
                     x-show="!loading" x-cloak>
                     <template x-if="todo.employees.length===0">
                         <div
-                            class="empty-board flex items-center justify-center flex-1 font-mono text-[1.2rem] text-[rgba(0,0,0,0.15)] uppercase tracking-widest">
-                            No active tasks</div>
+                            class="empty-board flex items-center justify-center flex-1 font-mono text-[1.2rem] text-[rgba(0,0,0,0.15)] uppercase tracking-widest"
+                            x-text="t('noActiveTasks')"></div>
                     </template>
 
                     <template x-for="(emp, ei) in todo.employees" :key="emp.name + refreshKey">
@@ -347,33 +323,29 @@
                 <div class="kpi-panel w-[clamp(190px,21vw,290px)] flex flex-col gap-[clamp(0.5rem,1.5vh,1.5rem)] border-l border-border pl-[2.5vw] flex-shrink-0"
                     x-show="!loading" x-cloak>
                     <div class="kpi-block flex flex-col gap-[clamp(0.2rem,0.6vh,0.4rem)]">
-                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest">Open
-                            Tasks</div>
+                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiOpenTasks')"></div>
                         <div class="kpi-value text-clamp-kpi-value font-bold tracking-tighter leading-none"
                             x-text="pad(todo.kpiOpen)"></div>
                         <div class="kpi-sub font-mono text-clamp-kpi-sub text-muted"
-                            x-text="`ACROSS ${todo.kpiEmp} EMPLOYEE${todo.kpiEmp!==1?'S':''}`"></div>
+                            x-text="t('kpiAcross')+' '+todo.kpiEmp+' '+(todo.kpiEmp!==1?t('kpiEmployees'):t('kpiEmployee'))"></div>
                     </div>
                     <div class="kpi-divider h-px bg-border my-[0.3vh]"></div>
                     <div class="kpi-block flex flex-col gap-[clamp(0.2rem,0.6vh,0.4rem)]">
-                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest">
-                            Urgent (P1)</div>
+                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiUrgent')"></div>
                         <div class="kpi-value text-clamp-kpi-value font-bold tracking-tighter leading-none"
                             :style="`color:var(--red)`" x-text="pad(todo.kpiUrgent)"></div>
-                        <div class="kpi-sub font-mono text-clamp-kpi-sub text-muted">REQUIRES ATTENTION</div>
+                        <div class="kpi-sub font-mono text-clamp-kpi-sub text-muted" x-text="t('kpiRequiresAttn')"></div>
                     </div>
                     <div class="kpi-divider h-px bg-border my-[0.3vh]"></div>
                     <div class="kpi-block flex flex-col gap-[clamp(0.2rem,0.6vh,0.4rem)]">
-                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest">In
-                            Progress</div>
+                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiInProgress')"></div>
                         <div class="kpi-value text-clamp-kpi-value font-bold tracking-tighter leading-none"
                             :style="`color:var(--amber)`" x-text="pad(todo.kpiProg)"></div>
-                        <div class="kpi-sub font-mono text-clamp-kpi-sub text-muted">CURRENTLY ACTIVE</div>
+                        <div class="kpi-sub font-mono text-clamp-kpi-sub text-muted" x-text="t('kpiCurrentlyActive')"></div>
                     </div>
                     <div class="kpi-divider h-px bg-border my-[0.3vh]"></div>
                     <div class="legend flex flex-col gap-[clamp(0.4rem,1vh,0.8rem)] mt-auto">
-                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest">
-                            Priority Legend</div>
+                        <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiLegend')"></div>
                         <div class="legend-item flex items-center gap-[10px] font-mono text-clamp-legend text-muted">
                             <span class="legend-dot w-[10px] h-[10px] rounded-full flex-shrink-0"
                                 style="background:#dc2626"></span>URGENTE</div>
@@ -404,19 +376,18 @@
                         <div class="hero-card-inner flex justify-between h-full">
                             <div class="hero-stats flex flex-col gap-[1vh] flex-shrink-0 w-[45%]">
                                 <div
-                                    class="hero-label font-mono text-clamp-hero-label text-muted uppercase tracking-widest">
-                                    SHIPPING TODAY</div>
+                                    class="hero-label font-mono text-clamp-hero-label text-muted uppercase tracking-widest"
+                                    x-text="t('ordShipping')"></div>
                                 <div class="hero-value text-clamp-hero-value font-bold tracking-tighter leading-none"
                                     style="color:var(--ca)" x-text="pad(orders.valShip)"></div>
                                 <div class="hero-sub font-mono text-clamp-hero-sub text-muted"
-                                    x-show="orders.valShip === 0">No orders to ship</div>
+                                    x-show="orders.valShip === 0" x-text="t('ordNoShip')"></div>
                             </div>
                             <div class="hero-list-wrapper flex-1 relative ml-[5%]">
                                 <div
                                     class="hero-list absolute inset-0 overflow-y-auto flex flex-col gap-[0.8vh] pr-[5px]">
                                     <template x-if="orders.valShip === 0">
-                                        <div class="hero-list-empty font-mono text-clamp-hero-sub text-muted italic">No
-                                            orders</div>
+                                        <div class="hero-list-empty font-mono text-clamp-hero-sub text-muted italic" x-text="t('ordNoOrders')"></div>
                                     </template>
                                     <template x-for="(o, idx) in orders.list.filter(x => x.cat === 'shipping')"
                                         :key="o.id + '_' + Math.random()">
@@ -435,19 +406,18 @@
                         <div class="hero-card-inner flex justify-between h-full">
                             <div class="hero-stats flex flex-col gap-[1vh] flex-shrink-0 w-[45%]">
                                 <div
-                                    class="hero-label font-mono text-clamp-hero-label text-muted uppercase tracking-widest">
-                                    IN PRODUCTION</div>
+                                    class="hero-label font-mono text-clamp-hero-label text-muted uppercase tracking-widest"
+                                    x-text="t('ordProduction')"></div>
                                 <div class="hero-value text-clamp-hero-value font-bold tracking-tighter leading-none"
                                     style="color:var(--ca)" x-text="pad(orders.valProd)"></div>
                                 <div class="hero-sub font-mono text-clamp-hero-sub text-muted"
-                                    x-show="orders.valProd === 0">No orders in production</div>
+                                    x-show="orders.valProd === 0" x-text="t('ordNoProd')"></div>
                             </div>
                             <div class="hero-list-wrapper flex-1 relative ml-[5%]">
                                 <div
                                     class="hero-list absolute inset-0 overflow-y-auto flex flex-col gap-[0.8vh] pr-[5px]">
                                     <template x-if="orders.valProd === 0">
-                                        <div class="hero-list-empty font-mono text-clamp-hero-sub text-muted italic">No
-                                            orders</div>
+                                        <div class="hero-list-empty font-mono text-clamp-hero-sub text-muted italic" x-text="t('ordNoOrders')"></div>
                                     </template>
                                     <template x-for="(o, idx) in orders.list.filter(x => x.cat === 'production')"
                                         :key="o.id + '_' + Math.random()">
@@ -466,19 +436,18 @@
                         <div class="hero-card-inner flex justify-between h-full">
                             <div class="hero-stats flex flex-col gap-[1vh] flex-shrink-0 w-[45%]">
                                 <div
-                                    class="hero-label font-mono text-clamp-hero-label text-muted uppercase tracking-widest">
-                                    PENDING PROD.</div>
+                                    class="hero-label font-mono text-clamp-hero-label text-muted uppercase tracking-widest"
+                                    x-text="t('ordPending')"></div>
                                 <div class="hero-value text-clamp-hero-value font-bold tracking-tighter leading-none"
                                     style="color:var(--ca)" x-text="pad(orders.valPend)"></div>
                                 <div class="hero-sub font-mono text-clamp-hero-sub text-muted"
-                                    x-show="orders.valPend === 0">No orders pending</div>
+                                    x-show="orders.valPend === 0" x-text="t('ordNoPend')"></div>
                             </div>
                             <div class="hero-list-wrapper flex-1 relative ml-[5%]">
                                 <div
                                     class="hero-list absolute inset-0 overflow-y-auto flex flex-col gap-[0.8vh] pr-[5px]">
                                     <template x-if="orders.valPend === 0">
-                                        <div class="hero-list-empty font-mono text-clamp-hero-sub text-muted italic">No
-                                            orders</div>
+                                        <div class="hero-list-empty font-mono text-clamp-hero-sub text-muted italic" x-text="t('ordNoOrders')"></div>
                                     </template>
                                     <template x-for="(o, idx) in orders.list.filter(x => x.cat === 'pending')"
                                         :key="o.id + '_' + Math.random()">
@@ -497,17 +466,17 @@
                     class="table-section flex-1 bg-surface border border-border flex flex-col overflow-hidden relative z-[1] min-h-0 shadow-card">
                     <div
                         class="table-header grid grid-cols-[180px_1fr_180px_180px_150px] py-[1.5vh] px-[2vw] border-b border-border flex-shrink-0 bg-surface2">
-                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted">ORDER ID</div>
-                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted">CLIENT</div>
-                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted">SHIP DATE</div>
-                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted">PRIORITY</div>
-                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted">STATUS</div>
+                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted" x-text="t('thOrderId')"></div>
+                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted" x-text="t('thClient')"></div>
+                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted" x-text="t('thShipDate')"></div>
+                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted" x-text="t('thPriority')"></div>
+                        <div class="th font-mono text-clamp-th uppercase tracking-widest text-muted" x-text="t('thStatus')"></div>
                     </div>
                     <div class="table-body flex-1 overflow-y-auto">
                         <template x-if="orders.list.length===0">
                             <div
-                                class="empty-table flex items-center justify-center h-full font-mono text-[1rem] text-[rgba(0,0,0,0.1)] uppercase tracking-widest">
-                                No orders found</div>
+                                class="empty-table flex items-center justify-center h-full font-mono text-[1rem] text-[rgba(0,0,0,0.1)] uppercase tracking-widest"
+                                x-text="t('ordNoFound')"></div>
                         </template>
                         <template x-for="(o, i) in orders.list" :key="o.id + '_' + Math.random()">
                             <div class="order-row grid grid-cols-[180px_1fr_180px_180px_150px] py-[1.8vh] px-[2vw] border-b border-border items-center animate-rowIn"
@@ -544,15 +513,15 @@
                 <!-- Today -->
                 <div class="col-panel col-today">
                     <div class="col-header">
-                        <span class="col-title">TODAY</span>
+                        <span class="col-title" x-text="t('evToday')"></span>
                         <span class="col-count"
-                            x-text="events.today.length + ' EVENT' + (events.today.length!==1?'S':'')"></span>
+                            x-text="events.today.length+' '+(events.today.length!==1?t('evEvents'):t('evEvent'))"></span>
                     </div>
                     <div class="event-list">
                         <template x-if="events.today.length===0">
                             <div class="empty-state">
                                 <div class="empty-icon">✅</div>
-                                <div>No events today</div>
+                                <div x-text="t('evNoToday')"></div>
                             </div>
                         </template>
                         <template x-for="(e,i) in events.today" :key="i+refreshKey">
@@ -570,14 +539,14 @@
                 <!-- Upcoming -->
                 <div class="col-panel col-upcoming">
                     <div class="col-header">
-                        <span class="col-title">UPCOMING</span>
-                        <span class="col-count" x-text="events.upcoming.length+' SCHEDULED'"></span>
+                        <span class="col-title" x-text="t('evUpcoming')"></span>
+                        <span class="col-count" x-text="events.upcoming.length+' '+t('evScheduled')"></span>
                     </div>
                     <div class="event-list">
                         <template x-if="events.upcoming.length===0">
                             <div class="empty-state">
                                 <div class="empty-icon">🗓</div>
-                                <div>No upcoming events</div>
+                                <div x-text="t('evNoUpcoming')"></div>
                             </div>
                         </template>
                         <template x-for="(e,i) in events.upcoming" :key="i+refreshKey">
@@ -591,7 +560,7 @@
                                     <div class="dep-meta"
                                         x-text="[e.time,e.place,e.responsible].filter(Boolean).join(' · ')"></div>
                                 </div>
-                                <div class="dep-badge" :class="e.badgeClass" x-text="e.countdownLabel"></div>
+                                <div class="dep-badge" :class="e.badgeClass" x-text="e.days===1?t('evTomorrow'):e.days===0?t('evToday'):t('evInDays').replace('{n}',e.days)"></div>
                             </div>
                         </template>
                     </div>
@@ -617,7 +586,7 @@
                 <div
                     class="live-dot w-[7px] h-[7px] rounded-full bg-green shadow-[0_0_10px_var(--green)] animate-blink flex-shrink-0">
                 </div>
-                <span>ADDITIUM 3D SPA · REALTIME · LAST SYNC <span x-text="lastSync"></span></span>
+                <span x-text="t('live')"></span> <span x-text="lastSync"></span>
             </div>
 
             <!-- Nav controls + Fullscreen -->
@@ -683,7 +652,7 @@
                 <button
                     class="nav-btn flex items-center justify-center w-[42px] h-[42px] border-none bg-transparent rounded-[8px] cursor-pointer text-muted transition-all duration-200 ease-cubic hover:bg-[rgba(0,0,0,0.05)] hover:text-text hover:-translate-y-[1px] active:scale-95"
                     :class="settingsOpen ? 'gear-open' : ''"
-                    @click="settingsOpen=true" title="Pengaturan">
+                    @click="settingsOpen=true" :title="t('settTitle')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path>
@@ -694,9 +663,9 @@
             <!-- Screen selector dropdown -->
             <select class="status-select flex-shrink-0"
                 @change="setScreen(parseInt($event.target.value))">
-                <option value="1" :selected="activeScreen===1">SCR 01 · TODO</option>
-                <option value="2" :selected="activeScreen===2">SCR 02 · ORDERS</option>
-                <option value="3" :selected="activeScreen===3">SCR 03 · EVENTS</option>
+                <option value="1" :selected="activeScreen===1" x-text="t('scr1')"></option>
+                <option value="2" :selected="activeScreen===2" x-text="t('scr2')"></option>
+                <option value="3" :selected="activeScreen===3" x-text="t('scr3')"></option>
             </select>
 
             <!-- Date -->
@@ -704,7 +673,7 @@
 
             <!-- Interval selector + countdown -->
             <div class="flex items-center gap-[6px] flex-shrink-0">
-                <span class="text-muted">ROTATE</span>
+                <span class="text-muted" x-text="t('rotate')"></span>
                 <select class="status-select"
                     @change="setRotateInterval(parseInt($event.target.value))">
                     <option value="15" :selected="settings.rotateInterval===15">15S</option>
@@ -714,11 +683,11 @@
                     <option value="90" :selected="settings.rotateInterval===90">90S</option>
                     <option value="120" :selected="settings.rotateInterval===120">120S</option>
                 </select>
-                <span x-show="settings.showCountdown">· NEXT IN <b class="font-semibold text-blue" x-text="rotateCd+'s'"></b></span>
+                <span x-show="settings.showCountdown" x-text="t('nextIn')+' '+rotateCd+'s'"></span>
             </div>
 
             <!-- Refresh countdown -->
-            <div class="flex-shrink-0" x-show="settings.showCountdown">REFRESH IN <b :style="`color:${syncColor}`" x-text="refreshCd+'S'"></b></div>
+            <div class="flex-shrink-0" x-show="settings.showCountdown"><span x-text="t('refreshIn')"></span> <b :style="`color:${syncColor}`" x-text="refreshCd+'S'"></b></div>
         </div>
     </div>
 
@@ -735,132 +704,166 @@
             <!-- Header -->
             <div class="settings-header">
                 <div>
-                    <div style="font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text)">Pengaturan</div>
-                    <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:3px">Tersimpan otomatis di browser ini</div>
+                    <div style="font-size:16px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text)" x-text="t('settTitle')"></div>
+                    <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:4px" x-text="t('settSubtitle')"></div>
                 </div>
-                <button class="settings-close" @click="settingsOpen=false">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <!-- Language selector -->
+                    <div class="lang-pills">
+                        <button class="lang-pill" :class="settings.lang==='en' ? 'on' : ''"
+                                @click="settings.lang='en'">EN</button>
+                        <button class="lang-pill" :class="settings.lang==='es' ? 'on' : ''"
+                                @click="settings.lang='es'">ES</button>
+                    </div>
+                    <button class="settings-close" @click="settingsOpen=false">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <!-- Body -->
+            <!-- Body: 2-column grid -->
             <div class="settings-body">
 
-                <!-- ── TAMPILAN ─────────────────────────── -->
-                <div class="settings-section">
-                    <div class="settings-section-label">Tampilan</div>
+                <!-- ── LEFT COLUMN: Display ──────────────────────────── -->
+                <div class="settings-col settings-col-left">
+                    <div class="settings-section">
+                        <div class="settings-section-label" x-text="t('secDisplay')"></div>
 
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-row-label">Timer Countdown</div>
-                            <div class="settings-row-desc">Tampilkan "NEXT IN" dan "REFRESH IN" di status bar</div>
+                        <!-- Countdown timers -->
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-label" x-text="t('setCountdownLabel')"></div>
+                                <div class="settings-row-desc" x-text="t('setCountdownDesc')"></div>
+                            </div>
+                            <button class="tog" :class="settings.showCountdown ? 'on' : 'off'"
+                                    @click="settings.showCountdown=!settings.showCountdown">
+                                <span class="tog-thumb"></span>
+                            </button>
                         </div>
-                        <button class="tog" :class="settings.showCountdown ? 'on' : 'off'"
-                                @click="settings.showCountdown=!settings.showCountdown">
-                            <span class="tog-thumb"></span>
-                        </button>
-                    </div>
 
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-row-label">Format Jam</div>
-                            <div class="settings-row-desc">Tampilan jam di header</div>
-                        </div>
-                        <div class="i-pills">
-                            <button class="i-pill" :class="settings.clockFormat==='24h' ? 'on' : ''"
-                                    @click="settings.clockFormat='24h'">24H</button>
-                            <button class="i-pill" :class="settings.clockFormat==='12h' ? 'on' : ''"
-                                    @click="settings.clockFormat='12h'">12H</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── AUTO ROTASI ──────────────────────── -->
-                <div class="settings-section">
-                    <div class="settings-section-label">Auto Rotasi Halaman</div>
-
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-row-label">Auto Rotasi</div>
-                            <div class="settings-row-desc">Pindah halaman otomatis setiap interval</div>
-                        </div>
-                        <button class="tog" :class="settings.autoRotate ? 'on' : 'off'"
-                                @click="settings.autoRotate=!settings.autoRotate">
-                            <span class="tog-thumb"></span>
-                        </button>
-                    </div>
-
-                    <div class="settings-row" :style="settings.autoRotate ? '' : 'opacity:0.38;pointer-events:none'">
-                        <div>
-                            <div class="settings-row-label">Interval Rotasi</div>
-                            <div class="settings-row-desc">Saat ini: <b x-text="settings.rotateInterval + 'S'"></b></div>
-                        </div>
-                        <div>
+                        <!-- Clock format -->
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-label" x-text="t('setClockLabel')"></div>
+                                <div class="settings-row-desc" x-text="t('setClockDesc')"></div>
+                            </div>
                             <div class="i-pills">
-                                <button class="i-pill" :class="settings.rotateInterval===30&&!_rotateCustom ? 'on' : ''"
-                                        @click="setRotateInterval(30);_rotateCustom=false">30S</button>
-                                <button class="i-pill" :class="settings.rotateInterval===45&&!_rotateCustom ? 'on' : ''"
-                                        @click="setRotateInterval(45);_rotateCustom=false">45S</button>
-                                <button class="i-pill" :class="settings.rotateInterval===60&&!_rotateCustom ? 'on' : ''"
-                                        @click="setRotateInterval(60);_rotateCustom=false">1MIN</button>
-                                <button class="i-pill" :class="settings.rotateInterval===120&&!_rotateCustom ? 'on' : ''"
-                                        @click="setRotateInterval(120);_rotateCustom=false">2MIN</button>
-                                <button class="i-pill" :class="_rotateCustom ? 'on' : ''"
-                                        @click="_rotateCustom=!_rotateCustom">CUSTOM</button>
-                            </div>
-                            <div x-show="_rotateCustom" style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:flex-end">
-                                <input type="number" min="5" max="3600" class="s-input"
-                                       :value="settings.rotateInterval"
-                                       @change="setRotateInterval(Math.max(5, parseInt($event.target.value)||45))">
-                                <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)">detik</span>
+                                <button class="i-pill" :class="settings.clockFormat==='24h' ? 'on' : ''"
+                                        @click="settings.clockFormat='24h'">24H</button>
+                                <button class="i-pill" :class="settings.clockFormat==='12h' ? 'on' : ''"
+                                        @click="settings.clockFormat='12h'">12H</button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- ── REFRESH DATA ─────────────────────── -->
-                <div class="settings-section">
-                    <div class="settings-section-label">Refresh Data</div>
-
-                    <div class="settings-row">
-                        <div>
-                            <div class="settings-row-label">Interval Refresh</div>
-                            <div class="settings-row-desc">Saat ini: <b x-text="settings.refreshInterval + 'S'"></b></div>
-                        </div>
-                        <div>
+                        <!-- Theme -->
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-label" x-text="t('setThemeLabel')"></div>
+                                <div class="settings-row-desc" x-text="t('setThemeDesc')"></div>
+                            </div>
                             <div class="i-pills">
-                                <button class="i-pill" :class="settings.refreshInterval===15&&!_refreshCustom ? 'on' : ''"
-                                        @click="setRefreshInterval(15);_refreshCustom=false">15S</button>
-                                <button class="i-pill" :class="settings.refreshInterval===30&&!_refreshCustom ? 'on' : ''"
-                                        @click="setRefreshInterval(30);_refreshCustom=false">30S</button>
-                                <button class="i-pill" :class="settings.refreshInterval===60&&!_refreshCustom ? 'on' : ''"
-                                        @click="setRefreshInterval(60);_refreshCustom=false">1MIN</button>
-                                <button class="i-pill" :class="settings.refreshInterval===120&&!_refreshCustom ? 'on' : ''"
-                                        @click="setRefreshInterval(120);_refreshCustom=false">2MIN</button>
-                                <button class="i-pill" :class="_refreshCustom ? 'on' : ''"
-                                        @click="_refreshCustom=!_refreshCustom">CUSTOM</button>
-                            </div>
-                            <div x-show="_refreshCustom" style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:flex-end">
-                                <input type="number" min="10" max="3600" class="s-input"
-                                       :value="settings.refreshInterval"
-                                       @change="setRefreshInterval(Math.max(10, parseInt($event.target.value)||30))">
-                                <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)">detik</span>
+                                <button class="i-pill" :class="!settings.darkMode ? 'on' : ''"
+                                        @click="settings.darkMode=false" x-text="t('setThemeLight')"></button>
+                                <button class="i-pill" :class="settings.darkMode ? 'on' : ''"
+                                        @click="settings.darkMode=true" x-text="t('setThemeDark')"></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── STATUS BAR ───────────────────────── -->
-                <div class="settings-section">
-                    <div class="settings-section-label">Status Bar</div>
+                <!-- ── DIVIDER ────────────────────────────────────────── -->
+                <div class="settings-col-divider"></div>
 
+                <!-- ── RIGHT COLUMN: Rotation + Refresh ─────────────── -->
+                <div class="settings-col settings-col-right">
+
+                    <!-- Auto Rotation -->
+                    <div class="settings-section">
+                        <div class="settings-section-label" x-text="t('secRotation')"></div>
+
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-label" x-text="t('setAutoRotateLabel')"></div>
+                                <div class="settings-row-desc" x-text="t('setAutoRotateDesc')"></div>
+                            </div>
+                            <button class="tog" :class="settings.autoRotate ? 'on' : 'off'"
+                                    @click="settings.autoRotate=!settings.autoRotate">
+                                <span class="tog-thumb"></span>
+                            </button>
+                        </div>
+
+                        <div class="settings-row" :style="settings.autoRotate ? '' : 'opacity:0.38;pointer-events:none'">
+                            <div>
+                                <div class="settings-row-label" x-text="t('setRotateIntervalLabel')"></div>
+                                <div class="settings-row-desc" x-text="t('setCurrent')+': '+settings.rotateInterval+t('settSeconds')"></div>
+                            </div>
+                            <div>
+                                <div class="i-pills">
+                                    <button class="i-pill" :class="settings.rotateInterval===30&&!_rotateCustom?'on':''"
+                                            @click="setRotateInterval(30);_rotateCustom=false">30S</button>
+                                    <button class="i-pill" :class="settings.rotateInterval===45&&!_rotateCustom?'on':''"
+                                            @click="setRotateInterval(45);_rotateCustom=false">45S</button>
+                                    <button class="i-pill" :class="settings.rotateInterval===60&&!_rotateCustom?'on':''"
+                                            @click="setRotateInterval(60);_rotateCustom=false">1MIN</button>
+                                    <button class="i-pill" :class="settings.rotateInterval===120&&!_rotateCustom?'on':''"
+                                            @click="setRotateInterval(120);_rotateCustom=false">2MIN</button>
+                                    <button class="i-pill" :class="_rotateCustom?'on':''"
+                                            @click="_rotateCustom=!_rotateCustom" x-text="t('settCustom')"></button>
+                                </div>
+                                <div x-show="_rotateCustom" style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                                    <input type="number" min="5" max="3600" class="s-input"
+                                           :value="settings.rotateInterval"
+                                           @change="setRotateInterval(Math.max(5,parseInt($event.target.value)||45))">
+                                    <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--muted)" x-text="t('settSeconds')==='s'?'sec':'seg'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Refresh -->
+                    <div class="settings-section" style="border-top:1px solid var(--border);padding-top:20px;margin-top:8px">
+                        <div class="settings-section-label" x-text="t('secRefresh')"></div>
+
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-row-label" x-text="t('setRefreshIntervalLabel')"></div>
+                                <div class="settings-row-desc" x-text="t('setCurrent')+': '+settings.refreshInterval+t('settSeconds')"></div>
+                            </div>
+                            <div>
+                                <div class="i-pills">
+                                    <button class="i-pill" :class="settings.refreshInterval===15&&!_refreshCustom?'on':''"
+                                            @click="setRefreshInterval(15);_refreshCustom=false">15S</button>
+                                    <button class="i-pill" :class="settings.refreshInterval===30&&!_refreshCustom?'on':''"
+                                            @click="setRefreshInterval(30);_refreshCustom=false">30S</button>
+                                    <button class="i-pill" :class="settings.refreshInterval===60&&!_refreshCustom?'on':''"
+                                            @click="setRefreshInterval(60);_refreshCustom=false">1MIN</button>
+                                    <button class="i-pill" :class="settings.refreshInterval===120&&!_refreshCustom?'on':''"
+                                            @click="setRefreshInterval(120);_refreshCustom=false">2MIN</button>
+                                    <button class="i-pill" :class="_refreshCustom?'on':''"
+                                            @click="_refreshCustom=!_refreshCustom" x-text="t('settCustom')"></button>
+                                </div>
+                                <div x-show="_refreshCustom" style="margin-top:8px;display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                                    <input type="number" min="10" max="3600" class="s-input"
+                                           :value="settings.refreshInterval"
+                                           @change="setRefreshInterval(Math.max(10,parseInt($event.target.value)||30))">
+                                    <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--muted)" x-text="t('settSeconds')==='s'?'sec':'seg'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ── FULL WIDTH: Status Bar ─────────────────────────── -->
+                <div class="settings-full">
+                    <div class="settings-section-label" x-text="t('secStatusBar')"></div>
                     <div class="settings-row">
                         <div>
-                            <div class="settings-row-label">Auto-Hide Status Bar</div>
-                            <div class="settings-row-desc">Sembunyikan otomatis · muncul saat hover bagian bawah layar</div>
+                            <div class="settings-row-label" x-text="t('setAutoHideLabel')"></div>
+                            <div class="settings-row-desc" x-text="t('setAutoHideDesc')"></div>
                         </div>
                         <button class="tog" :class="settings.autoHideStatusBar ? 'on' : 'off'"
                                 @click="settings.autoHideStatusBar=!settings.autoHideStatusBar; if(!settings.autoHideStatusBar) statusBarVisible=true">
@@ -873,7 +876,7 @@
 
             <!-- Footer -->
             <div class="settings-footer">
-                <button class="reset-btn" @click="resetSettings()">↺ Reset ke Default</button>
+                <button class="reset-btn" @click="resetSettings()" x-text="t('settReset')"></button>
             </div>
 
         </div><!-- /settings-card -->

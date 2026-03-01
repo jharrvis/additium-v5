@@ -30,6 +30,8 @@ function spaDashboard() {
             autoHideStatusBar: false,
             autoRotate: true,
             clockFormat: '24h',
+            lang: 'en',
+            darkMode: false,
         },
 
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
@@ -50,6 +52,8 @@ function spaDashboard() {
             this.$watch(() => JSON.stringify(this.settings), () => {
                 localStorage.setItem('additium_v5_settings', JSON.stringify(this.settings));
             });
+            this.applyDarkMode(this.settings.darkMode);
+            this.$watch('settings.darkMode', (val) => this.applyDarkMode(val));
             if (this.settings.autoHideStatusBar) {
                 setTimeout(() => { this.statusBarVisible = false; }, 3000);
             }
@@ -140,6 +144,8 @@ function spaDashboard() {
                 autoHideStatusBar: false,
                 autoRotate: true,
                 clockFormat: '24h',
+                lang: 'en',
+                darkMode: false,
             });
             this.rotateCd = 45;
             this.refreshCd = 30;
@@ -158,6 +164,16 @@ function spaDashboard() {
             if (this.settings.autoHideStatusBar && !this.settingsOpen) {
                 this._sbTimer = setTimeout(() => { this.statusBarVisible = false; }, 1500);
             }
+        },
+
+        t(key) {
+            const lang = this.settings.lang || 'en';
+            const tr = TRANSLATIONS[lang] || TRANSLATIONS.en;
+            return tr[key] !== undefined ? tr[key] : (TRANSLATIONS.en[key] || key);
+        },
+
+        applyDarkMode(dark) {
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
         },
 
         toggleFullscreen() {
@@ -232,7 +248,7 @@ function spaDashboard() {
                 console.warn(`[proxy] ${proxyErr.message} — falling back to direct fetch`);
                 if (!this.usingFallback) {
                     this.usingFallback = true;
-                    this.toast('⚠️', 'Mode Fallback', 'Proxy not available — data pulled directly from Google Sheets (may be slightly out of date)', '#d97706');
+                    this.toast('⚠️', this.t('toastFallbackTitle'), this.t('toastFallbackMsg'), '#d97706');
                 }
                 const fallbackUrl = CONFIG.spreadsheetBase + CONFIG.sheets[sheetName] + '&t=' + Date.now();
                 const res = await fetch(fallbackUrl);
@@ -257,7 +273,7 @@ function spaDashboard() {
                 setTimeout(() => this.synced = false, 1500);
             } catch (e) {
                 console.error('[fetchAllData] Error:', e.message);
-                this.toast('⚠️', 'Sync Error', e.message, '#d97706');
+                this.toast('⚠️', this.t('toastSyncError'), e.message, '#d97706');
             }
         },
 
@@ -339,7 +355,7 @@ function spaDashboard() {
             this.todo.kpiEmp = workers.length;
 
             if (this.refreshKey > 0 && urgCount > this.todo.prevUrgent)
-                this.toast('🚨', 'Urgent Task Alert', `${urgCount} urgent task${urgCount > 1 ? 's' : ''} require attention`, '#dc2626');
+                this.toast('🚨', this.t('toastUrgentTitle'), (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount), '#dc2626');
             this.todo.prevUrgent = urgCount;
         },
 
@@ -393,7 +409,7 @@ function spaDashboard() {
             this.orders.valProd = prodCount;
             this.orders.valPend = pendCount;
             if (this.refreshKey > 0 && shipCount > this.orders.prevShip)
-                this.toast('🚚', 'Shipping Alert', `${shipCount} order${shipCount > 1 ? 's' : ''} shipping today`, '#dc2626');
+                this.toast('🚚', this.t('toastShipTitle'), (shipCount > 1 ? this.t('toastShipMsgPlural') : this.t('toastShipMsg')).replace('{n}', shipCount), '#dc2626');
             this.orders.prevShip = shipCount;
         },
 
@@ -435,7 +451,7 @@ function spaDashboard() {
                         ...entry,
                         dateLabel: dl,
                         dayName: dn,
-                        countdownLabel: days === 1 ? 'TOMORROW' : days === 0 ? 'TODAY' : `IN ${days}D`,
+                        days: days,
                         badgeClass: days === 1 ? 'tomorrow' : days <= 3 ? 'soon' : 'normal',
                         sortKey: d ? d.getTime() : 999999999
                     });
@@ -446,7 +462,7 @@ function spaDashboard() {
             this.events.today = today;
             this.events.upcoming = upcoming;
             if (this.refreshKey > 0 && today.length > this.events.prevTodayCount)
-                this.toast('📅', 'New Event Today', today[today.length - 1].title, '#d97706');
+                this.toast('📅', this.t('toastEventTitle'), today[today.length - 1].title, '#d97706');
             this.events.prevTodayCount = today.length;
         }
     };
