@@ -59,6 +59,47 @@
         html[data-theme="dark"] .settings-row + .settings-row { border-color: rgba(255,255,255,0.05) !important; }
         html[data-theme="dark"] .settings-col-divider { background: rgba(255,255,255,0.06) !important; }
 
+        /* ── Importance pills (Screen 01) ────────────────────── */
+        html[data-theme="dark"] .pill-maxima { background: rgba(52,211,153,0.15) !important; color: #6ee7b7 !important; }
+        html[data-theme="dark"] .pill-alta   { background: rgba(52,211,153,0.12) !important; color: #86efac !important; }
+        html[data-theme="dark"] .pill-normal { background: rgba(248,113,113,0.12) !important; color: #fca5a5 !important; }
+        html[data-theme="dark"] .pill-baja   { background: rgba(248,113,113,0.15) !important; color: #fca5a5 !important; }
+
+        /* ── Order status chips (Screen 02) ──────────────────── */
+        html[data-theme="dark"] .chip-ship { background: rgba(52,211,153,0.12) !important; color: #6ee7b7 !important; }
+        html[data-theme="dark"] .chip-prod { background: rgba(248,113,113,0.12) !important; color: #fca5a5 !important; }
+        html[data-theme="dark"] .chip-pend { background: rgba(248,113,113,0.18) !important; color: #fca5a5 !important; }
+        html[data-theme="dark"] .chip-done { background: rgba(52,211,153,0.15) !important; color: #6ee7b7 !important; }
+
+        /* ── Event dep badges (bg + border; text already uses var()) ── */
+        html[data-theme="dark"] .dep-badge.normal   { background: rgba(167,139,250,0.12) !important; border-color: rgba(167,139,250,0.25) !important; }
+        html[data-theme="dark"] .dep-badge.soon     { background: rgba(251,191,36,0.1) !important;   border-color: rgba(251,191,36,0.22) !important; }
+        html[data-theme="dark"] .dep-badge.tomorrow { background: rgba(248,113,113,0.12) !important; border-color: rgba(248,113,113,0.25) !important; }
+
+        /* ── Page badge borders ───────────────────────────────── */
+        html[data-theme="dark"] .todo .page-badge   { border-color: rgba(77,142,245,0.35) !important; }
+        html[data-theme="dark"] .orders .page-badge { border-color: rgba(52,211,153,0.35) !important; }
+        html[data-theme="dark"] .events .page-badge { border-color: rgba(251,191,36,0.35) !important; }
+
+        /* ── Status select hover ──────────────────────────────── */
+        html[data-theme="dark"] .status-select:hover { border-color: rgba(255,255,255,0.2) !important; color: var(--text) !important; }
+
+        /* ── Scrollbar thumb ──────────────────────────────────── */
+        html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12) !important; }
+
+        /* ── Employee task count badge ────────────────────────── */
+        html[data-theme="dark"] .emp-count { background: rgba(77,142,245,0.12) !important; }
+
+        /* ── Hero card accent variables ─────────────────────────
+           Light mode defined via class (remove inline style from HTML).
+           Dark mode: brighter/saturated accent colors.             */
+        .hero-ship { --ca: #1a7b4f; --cg: rgba(26,123,79,0.15); }
+        .hero-prod { --ca: #a91f24; --cg: rgba(169,31,36,0.15); }
+        .hero-pend { --ca: #aa1111; --cg: rgba(170,17,17,0.15); }
+        html[data-theme="dark"] .hero-ship { --ca: #34d399; --cg: rgba(52,211,153,0.1); }
+        html[data-theme="dark"] .hero-prod { --ca: #f87171; --cg: rgba(248,113,113,0.1); }
+        html[data-theme="dark"] .hero-pend { --ca: #fbbf24; --cg: rgba(251,191,36,0.08); }
+
         /* ── Modern rounded cards ──────────────────────────────────── */
         .emp-col          { border-radius: 16px; overflow: hidden; }
         .emp-header       { border-radius: 16px 16px 0 0; }
@@ -356,16 +397,16 @@
                         <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiLegend')"></div>
                         <div class="legend-item flex items-center gap-[10px] font-mono text-clamp-legend text-muted">
                             <span class="legend-dot w-[10px] h-[10px] rounded-full flex-shrink-0"
-                                style="background:#dc2626"></span>URGENTE</div>
+                                style="background:var(--red)"></span>URGENTE</div>
                         <div class="legend-item flex items-center gap-[10px] font-mono text-clamp-legend text-muted">
                             <span class="legend-dot w-[10px] h-[10px] rounded-full flex-shrink-0"
-                                style="background:#d97706"></span>IMPORTANTE</div>
+                                style="background:var(--amber)"></span>IMPORTANTE</div>
                         <div class="legend-item flex items-center gap-[10px] font-mono text-clamp-legend text-muted">
                             <span class="legend-dot w-[10px] h-[10px] rounded-full flex-shrink-0"
-                                style="background:#2563eb"></span>NORMAL</div>
+                                style="background:var(--blue)"></span>NORMAL</div>
                         <div class="legend-item flex items-center gap-[10px] font-mono text-clamp-legend text-muted">
                             <span class="legend-dot w-[10px] h-[10px] rounded-full flex-shrink-0"
-                                style="background:#059669"></span>BAJA</div>
+                                style="background:var(--green)"></span>BAJA</div>
                     </div>
                 </div>
 
@@ -379,8 +420,7 @@
 
             <div class="main-content flex-1 flex flex-col overflow-hidden min-h-0 relative z-[1]">
                 <div class="hero-row grid grid-cols-3 gap-[1.5vw] flex-shrink-0 mb-[2vh] relative z-[1]">
-                    <div class="hero-card bg-surface border border-border border-t-[3px] py-[2.5vh] px-[2.5vw] flex flex-col gap-[1vh] relative overflow-hidden animate-cardInOrders shadow-card"
-                        style="--ca:#1a7b4f;--cg:rgba(26,123,79,0.15)">
+                    <div class="hero-card hero-ship bg-surface border border-border border-t-[3px] py-[2.5vh] px-[2.5vw] flex flex-col gap-[1vh] relative overflow-hidden animate-cardInOrders shadow-card">
                         <div class="hero-card-inner flex justify-between h-full">
                             <div class="hero-stats flex flex-col gap-[1vh] flex-shrink-0 w-[45%]">
                                 <div
@@ -409,8 +449,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="hero-card bg-surface border border-border border-t-[3px] py-[2.5vh] px-[2.5vw] flex flex-col gap-[1vh] relative overflow-hidden animate-cardInOrders shadow-card"
-                        style="--ca:#a91f24;--cg:rgba(169,31,36,0.15)">
+                    <div class="hero-card hero-prod bg-surface border border-border border-t-[3px] py-[2.5vh] px-[2.5vw] flex flex-col gap-[1vh] relative overflow-hidden animate-cardInOrders shadow-card">
                         <div class="hero-card-inner flex justify-between h-full">
                             <div class="hero-stats flex flex-col gap-[1vh] flex-shrink-0 w-[45%]">
                                 <div
@@ -439,8 +478,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="hero-card bg-surface border border-border border-t-[3px] py-[2.5vh] px-[2.5vw] flex flex-col gap-[1vh] relative overflow-hidden animate-cardInOrders shadow-card"
-                        style="--ca:#aa1111;--cg:rgba(170,17,17,0.15)">
+                    <div class="hero-card hero-pend bg-surface border border-border border-t-[3px] py-[2.5vh] px-[2.5vw] flex flex-col gap-[1vh] relative overflow-hidden animate-cardInOrders shadow-card">
                         <div class="hero-card-inner flex justify-between h-full">
                             <div class="hero-stats flex flex-col gap-[1vh] flex-shrink-0 w-[45%]">
                                 <div

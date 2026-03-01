@@ -4,17 +4,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: '#f5f7fa',
-        surface: '#ffffff',
-        surface2: '#f0f2f5',
-        border: 'rgba(0, 0, 0, 0.08)',
-        text: '#1a1a2e',
-        muted: 'rgba(26, 26, 46, 0.5)',
-        blue: '#2563eb',
-        green: '#059669',
-        amber: '#d97706',
-        red: '#dc2626',
-        purple: '#7c3aed',
+        bg:      'var(--bg)',
+        surface: 'var(--surface)',
+        surface2:'var(--surface2)',
+        border:  'var(--border)',
+        text:    'var(--text)',
+        muted:   'var(--muted)',
+        blue:    'var(--blue)',
+        green:   'var(--green)',
+        amber:   'var(--amber)',
+        red:     'var(--red)',
+        purple:  'var(--purple)',
       },
       fontFamily: {
         sans: ['Space Grotesk', 'sans-serif'],
