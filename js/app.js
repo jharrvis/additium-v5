@@ -154,13 +154,22 @@ function spaDashboard() {
             return d.getDate() === n.getDate() && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
         },
 
+        async fetchSheet(sheetName) {
+            const url = getCsvUrl(sheetName) + '&t=' + Date.now();
+            const res = await fetch(url, {
+                cache: 'no-store',
+                headers: { 'Pragma': 'no-cache' },
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${sheetName}`);
+            return res.text();
+        },
+
         async fetchAllData() {
-            const ts = Date.now();
             try {
                 const [todoRaw, ordersRaw, eventsRaw] = await Promise.all([
-                    fetch(getCsvUrl('tasks') + '&t=' + ts).then(r => r.text()),
-                    fetch(getCsvUrl('orders') + '&t=' + ts).then(r => r.text()),
-                    fetch(getCsvUrl('events') + '&t=' + ts).then(r => r.text())
+                    this.fetchSheet('tasks'),
+                    this.fetchSheet('orders'),
+                    this.fetchSheet('events'),
                 ]);
                 this.processTodo(this.parseCSV(todoRaw).slice(1));
                 this.processOrders(this.parseCSV(ordersRaw).slice(1));
@@ -169,7 +178,10 @@ function spaDashboard() {
                 this.refreshKey++;
                 this.synced = true;
                 setTimeout(() => this.synced = false, 1500);
-            } catch (e) { console.error("Fetch error:", e); }
+            } catch (e) {
+                console.error('[fetchAllData] Error:', e.message);
+                this.toast('⚠️', 'Sync Error', e.message, '#d97706');
+            }
         },
 
         // ─── Helper: get column value per-row, adapting to 6-col or 7-col format ───
