@@ -71,7 +71,13 @@
         .settings-card    { border-radius: 20px; }
 
         /* ── Status bar auto-hide ──────────────────────────────────── */
-        .status-bar { transition: opacity 0.35s ease, transform 0.35s ease; }
+        .status-bar {
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease;
+            max-height: 140px; overflow: hidden;
+        }
+        .status-bar.sb-collapsed {
+            max-height: 0; opacity: 0; pointer-events: none; margin-top: 0 !important;
+        }
         .sb-trigger { position: fixed; bottom: 0; left: 0; right: 0; height: 16px; z-index: 50; }
 
         /* ── Settings modal ────────────────────────────────────────── */
@@ -91,20 +97,21 @@
             border: 1px solid var(--border);
             box-shadow: 0 32px 80px rgba(0,0,0,0.18);
             width: 720px; max-width: 95vw; max-height: 92vh;
-            overflow-y: auto; scrollbar-width: thin;
+            display: flex; flex-direction: column; overflow: hidden;
         }
         .settings-header {
             display: flex; align-items: center; justify-content: space-between;
             padding: 22px 28px 20px;
             border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; background: var(--surface); z-index: 10;
             border-radius: 20px 20px 0 0; gap: 16px;
+            flex-shrink: 0;
         }
         .settings-body {
             padding: 0 28px 8px;
             display: grid;
             grid-template-columns: 1fr 1px 1fr;
             gap: 0 0;
+            flex: 1; overflow-y: auto; scrollbar-width: thin;
         }
         .settings-col { padding: 20px 0; }
         .settings-col-right { padding: 20px 0 20px 28px; }
@@ -189,6 +196,7 @@
         .settings-footer {
             padding: 16px 28px; border-top: 1px solid var(--border);
             display: flex; justify-content: flex-end;
+            flex-shrink: 0;
         }
         .reset-btn {
             font-size: 12px; font-family: 'DM Mono', monospace;
@@ -320,7 +328,7 @@
                 </div>
 
                 <!-- KPI sidebar -->
-                <div class="kpi-panel w-[clamp(190px,21vw,290px)] flex flex-col gap-[clamp(0.5rem,1.5vh,1.5rem)] border-l border-border pl-[2.5vw] flex-shrink-0"
+                <div class="kpi-panel flex flex-col gap-[clamp(0.5rem,1.5vh,1.5rem)] border-l border-border flex-shrink-0" style="width:clamp(150px,14vw,200px);padding-left:1.5vw"
                     x-show="!loading" x-cloak>
                     <div class="kpi-block flex flex-col gap-[clamp(0.2rem,0.6vh,0.4rem)]">
                         <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiOpenTasks')"></div>
@@ -572,16 +580,16 @@
 
     <!-- STATUS BAR -->
     <div class="status-bar flex-shrink-0 mt-[1.5vh] relative z-[1]"
-         :style="settings.autoHideStatusBar && !statusBarVisible ? 'opacity:0;transform:translateY(6px);pointer-events:none' : ''"
+         :class="{'sb-collapsed': settings.autoHideStatusBar && !statusBarVisible}"
          @mouseenter="sbEnter()" @mouseleave="sbLeave()">
         <div class="sync-track h-[3px] bg-[rgba(0,0,0,0.05)] mb-[1.2vh] overflow-hidden rounded-[2px]">
             <div class="sync-fill h-full rounded-[2px]" :class="{flash:synced}"
                 :style="`width:${rotatePct}%;background:var(--blue)`"></div>
         </div>
-        <div
-            class="status-row flex justify-between items-center font-mono text-clamp-status text-muted pb-[1.5vh] gap-[2vw]">
+        <div class="status-row font-mono text-clamp-status text-muted pb-[1.5vh]"
+            style="display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:0 2vw;">
 
-            <!-- Live indicator -->
+            <!-- Left: Live indicator -->
             <div class="status-left flex items-center gap-2 flex-shrink-0">
                 <div
                     class="live-dot w-[7px] h-[7px] rounded-full bg-green shadow-[0_0_10px_var(--green)] animate-blink flex-shrink-0">
@@ -589,7 +597,7 @@
                 <span x-text="t('live')"></span> <span x-text="lastSync"></span>
             </div>
 
-            <!-- Nav controls + Fullscreen -->
+            <!-- Center: All controls in one pill -->
             <div
                 class="status-controls flex items-center gap-[6px] bg-surface py-1 px-1 rounded-[12px] border border-border shadow-btn flex-shrink-0">
                 <button
@@ -629,6 +637,29 @@
                 </button>
                 <!-- Separator -->
                 <div class="w-px bg-border flex-shrink-0" style="height:60%;margin:0 2px"></div>
+                <!-- Screen selector -->
+                <select class="status-select"
+                    @change="setScreen(parseInt($event.target.value))">
+                    <option value="1" :selected="activeScreen===1" x-text="t('scr1')"></option>
+                    <option value="2" :selected="activeScreen===2" x-text="t('scr2')"></option>
+                    <option value="3" :selected="activeScreen===3" x-text="t('scr3')"></option>
+                </select>
+                <!-- Separator -->
+                <div class="w-px bg-border flex-shrink-0" style="height:60%;margin:0 2px"></div>
+                <!-- Rotate interval -->
+                <span class="px-1" x-text="t('rotate')"></span>
+                <select class="status-select"
+                    @change="setRotateInterval(parseInt($event.target.value))">
+                    <option value="15" :selected="settings.rotateInterval===15">15S</option>
+                    <option value="30" :selected="settings.rotateInterval===30">30S</option>
+                    <option value="45" :selected="settings.rotateInterval===45">45S</option>
+                    <option value="60" :selected="settings.rotateInterval===60">60S</option>
+                    <option value="90" :selected="settings.rotateInterval===90">90S</option>
+                    <option value="120" :selected="settings.rotateInterval===120">120S</option>
+                </select>
+                <span x-show="settings.showCountdown" class="px-1" x-text="t('nextIn')+' '+rotateCd+'s'"></span>
+                <!-- Separator -->
+                <div class="w-px bg-border flex-shrink-0" style="height:60%;margin:0 2px"></div>
                 <!-- Fullscreen button -->
                 <button
                     class="nav-btn flex items-center justify-center w-[42px] h-[42px] border-none bg-transparent rounded-[8px] cursor-pointer text-muted transition-all duration-200 ease-cubic hover:bg-[rgba(0,0,0,0.05)] hover:text-text hover:-translate-y-[1px] active:scale-95"
@@ -660,34 +691,11 @@
                 </button>
             </div>
 
-            <!-- Screen selector dropdown -->
-            <select class="status-select flex-shrink-0"
-                @change="setScreen(parseInt($event.target.value))">
-                <option value="1" :selected="activeScreen===1" x-text="t('scr1')"></option>
-                <option value="2" :selected="activeScreen===2" x-text="t('scr2')"></option>
-                <option value="3" :selected="activeScreen===3" x-text="t('scr3')"></option>
-            </select>
-
-            <!-- Date -->
-            <div class="flex-shrink-0" x-text="dateStr"></div>
-
-            <!-- Interval selector + countdown -->
-            <div class="flex items-center gap-[6px] flex-shrink-0">
-                <span class="text-muted" x-text="t('rotate')"></span>
-                <select class="status-select"
-                    @change="setRotateInterval(parseInt($event.target.value))">
-                    <option value="15" :selected="settings.rotateInterval===15">15S</option>
-                    <option value="30" :selected="settings.rotateInterval===30">30S</option>
-                    <option value="45" :selected="settings.rotateInterval===45">45S</option>
-                    <option value="60" :selected="settings.rotateInterval===60">60S</option>
-                    <option value="90" :selected="settings.rotateInterval===90">90S</option>
-                    <option value="120" :selected="settings.rotateInterval===120">120S</option>
-                </select>
-                <span x-show="settings.showCountdown" x-text="t('nextIn')+' '+rotateCd+'s'"></span>
+            <!-- Right: refresh countdown + date -->
+            <div class="flex items-center justify-end gap-[1.5vw] flex-shrink-0">
+                <div x-show="settings.showCountdown"><span x-text="t('refreshIn')"></span> <b :style="`color:${syncColor}`" x-text="refreshCd+'S'"></b></div>
+                <div x-text="dateStr"></div>
             </div>
-
-            <!-- Refresh countdown -->
-            <div class="flex-shrink-0" x-show="settings.showCountdown"><span x-text="t('refreshIn')"></span> <b :style="`color:${syncColor}`" x-text="refreshCd+'S'"></b></div>
         </div>
     </div>
 
