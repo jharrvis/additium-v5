@@ -54,9 +54,12 @@ function spaDashboard() {
             });
             this.applyDarkMode(this.settings.darkMode);
             this.$watch('settings.darkMode', (val) => this.applyDarkMode(val));
-            if (this.settings.autoHideStatusBar) {
-                setTimeout(() => { this.statusBarVisible = false; }, 3000);
-            }
+            // Auto-hide status bar: show initially, then hide after 2 seconds
+            setTimeout(() => {
+                if (this.settings.autoHideStatusBar) {
+                    this.statusBarVisible = false;
+                }
+            }, 2000);
         },
 
         startClock() {
@@ -96,10 +99,20 @@ function spaDashboard() {
         },
 
         initAutoScroll() {
+            // Delay auto-scroll for todo list by 30 seconds
+            let todoScrollEnabled = false;
+            setTimeout(() => { todoScrollEnabled = true; }, 30000);
+
             setInterval(() => {
                 document.querySelectorAll('.emp-tasks, .event-list, .table-body').forEach(el => {
                     if (el.scrollHeight > el.clientHeight) {
-                        el.scrollTop += 0.8;
+                        // Skip todo scroll for first 30 seconds
+                        if (el.classList.contains('emp-tasks') && !todoScrollEnabled) return;
+
+                        // Very slow scroll speed
+                        const scrollSpeed = el.classList.contains('emp-tasks') ? 0.3 : 0.8;
+                        el.scrollTop += scrollSpeed;
+
                         if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
                             if (!el.dataset.resetting) {
                                 el.dataset.resetting = true;
