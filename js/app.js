@@ -27,7 +27,7 @@ function spaDashboard() {
             showCountdown: false,
             rotateInterval: 45,
             refreshInterval: 30,
-            autoHideStatusBar: false,
+            autoHideStatusBar: true,
             autoRotate: true,
             clockFormat: '24h',
             lang: 'en',
@@ -54,12 +54,8 @@ function spaDashboard() {
             });
             this.applyDarkMode(this.settings.darkMode);
             this.$watch('settings.darkMode', (val) => this.applyDarkMode(val));
-            // Auto-hide status bar: show initially, then hide after 2 seconds
-            setTimeout(() => {
-                if (this.settings.autoHideStatusBar) {
-                    this.statusBarVisible = false;
-                }
-            }, 2000);
+            // Auto-hide status bar: always show on load, then hide after 2 seconds
+            setTimeout(() => { this.statusBarVisible = false; }, 2000);
         },
 
         startClock() {
@@ -103,34 +99,58 @@ function spaDashboard() {
             let todoScrollEnabled = false;
             setTimeout(() => { todoScrollEnabled = true; }, 30000);
 
+            // Tick counter controls speed per element type (no fractional px issues).
+            // emp-tasks:  1px per 4 ticks (200ms) ≈ 5px/s  — very slow
+            // table-body: 1px per 6 ticks (300ms) ≈ 3px/s  — slow
+            // event-list: 1px per tick    (50ms)  ≈ 20px/s — normal
+            // Hover over any scrollable element pauses its scroll.
+            let tick = 0;
             setInterval(() => {
+                tick++;
                 document.querySelectorAll('.emp-tasks, .event-list, .table-body').forEach(el => {
-                    if (el.scrollHeight > el.clientHeight) {
-                        // Skip todo scroll for first 30 seconds
-                        if (el.classList.contains('emp-tasks') && !todoScrollEnabled) return;
+                    if (el.scrollHeight <= el.clientHeight) return;
+                    if (el.matches(':hover')) return;
 
-                        // Very slow scroll speed
-                        const scrollSpeed = el.classList.contains('emp-tasks') ? 0.3 : 0.8;
-                        el.scrollTop += scrollSpeed;
+                    if (el.classList.contains('emp-tasks')) {
+                        if (!todoScrollEnabled) return;
+                        if (tick % 4 !== 0) return;
+                    } else if (el.classList.contains('table-body')) {
+                        if (tick % 6 !== 0) return;
+                    }
 
-                        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
-                            if (!el.dataset.resetting) {
-                                el.dataset.resetting = true;
-                                setTimeout(() => {
-                                    el.scrollTop = 0;
-                                    delete el.dataset.resetting;
-                                }, 3000);
-                            }
+                    el.scrollTop += 1;
+
+                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
+                        if (!el.dataset.resetting) {
+                            el.dataset.resetting = true;
+                            setTimeout(() => {
+                                el.scrollTop = 0;
+                                delete el.dataset.resetting;
+                            }, 3000);
                         }
                     }
                 });
             }, 50);
         },
 
-        nextScreen() { this.activeScreen = (this.activeScreen % CONFIG.screens.length) + 1; },
-        prevScreen() { this.activeScreen = this.activeScreen <= 1 ? CONFIG.screens.length : this.activeScreen - 1; },
+        nextScreen() { this.activeScreen = (this.activeScreen % 3) + 1; },
+        prevScreen() { this.activeScreen = this.activeScreen <= 1 ? 3 : this.activeScreen - 1; },
         setScreen(id) { this.activeScreen = id; this.rotateCd = this.settings.rotateInterval; },
         togglePause() { this.paused = !this.paused; if (!this.paused) this.rotateCd = this.settings.rotateInterval; },
+
+        get activeWorker() {
+            if (this.activeScreen < 4) return null;
+            return this.todo.employees[this.activeScreen - 4] || null;
+        },
+
+        workerMeetings(workerName) {
+            const name = (workerName || '').toLowerCase();
+            const match = e => (e.responsible || '').toLowerCase().includes(name);
+            return {
+                today: this.events.today.filter(match),
+                upcoming: this.events.upcoming.filter(match),
+            };
+        },
 
         setRotateInterval(sec) {
             this.settings.rotateInterval = sec;
@@ -154,7 +174,7 @@ function spaDashboard() {
                 showCountdown: false,
                 rotateInterval: 45,
                 refreshInterval: 30,
-                autoHideStatusBar: false,
+                autoHideStatusBar: true,
                 autoRotate: true,
                 clockFormat: '24h',
                 lang: 'en',

@@ -114,6 +114,14 @@ const TRANSLATIONS = {
         toastShipMsg: '{n} order shipping today',
         toastShipMsgPlural: '{n} orders shipping today',
         toastEventTitle: 'New Event Today',
+        // Worker screens
+        workerScreenBadge: 'WORKER',
+        workerTasksTitle: 'Tasks',
+        workerMeetingsTitle: 'Meetings & Events',
+        workerHolidaysTitle: 'Holidays',
+        workerHolidaysComingSoon: 'Coming soon',
+        workerNoTasks: 'No active tasks',
+        workerNoMeetings: 'No upcoming events',
         // Settings
         settTitle: 'Settings',
         settSubtitle: 'Auto-saved in this browser',
@@ -205,6 +213,14 @@ const TRANSLATIONS = {
         toastShipMsg: '{n} pedido listo para envío hoy',
         toastShipMsgPlural: '{n} pedidos listos para envío hoy',
         toastEventTitle: 'Nuevo Evento Hoy',
+        // Worker screens
+        workerScreenBadge: 'TRABAJADOR',
+        workerTasksTitle: 'Tareas',
+        workerMeetingsTitle: 'Reuniones y Eventos',
+        workerHolidaysTitle: 'Vacaciones',
+        workerHolidaysComingSoon: 'Próximamente',
+        workerNoTasks: 'Sin tareas activas',
+        workerNoMeetings: 'Sin eventos próximos',
         // Settings
         settTitle: 'Configuración',
         settSubtitle: 'Guardado automáticamente en este navegador',

@@ -11,7 +11,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=11">
     <script src="js/config.js?v=10"></script>
-    <script src="js/app.js?v=10"></script>
+    <script src="js/app.js?v=11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <style>
         [x-cloak] { display: none !important; }
@@ -80,6 +80,69 @@
         html[data-theme="dark"] .todo .page-badge   { border-color: rgba(77,142,245,0.35) !important; }
         html[data-theme="dark"] .orders .page-badge { border-color: rgba(52,211,153,0.35) !important; }
         html[data-theme="dark"] .events .page-badge { border-color: rgba(251,191,36,0.35) !important; }
+
+        /* ── Worker badge ─────────────────────────────────────── */
+        .page-badge.worker { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+        html[data-theme="dark"] .page-badge.worker { border-color: rgba(167,139,250,0.35) !important; }
+
+        /* ── Worker screen: event-list inner padding ─────────────── */
+        .worker-screen .event-list {
+            padding: 1.5vh 1.2vw;
+        }
+
+        /* ── Worker screen: compact meeting cards (match task card size) ── */
+        .worker-screen .event-card-today {
+            padding: 1.5vh 1.2vw;
+            gap: 0.6vh;
+        }
+        .worker-screen .ev-time {
+            font-size: clamp(0.7rem, 1.4vh, 0.95rem);
+        }
+        .worker-screen .ev-title-today {
+            font-size: clamp(1rem, 2vh, 1.4rem);
+            line-height: 1.25;
+        }
+        .worker-screen .ev-meta {
+            font-size: clamp(0.65rem, 1.2vh, 0.85rem);
+            margin-top: 0.2vh;
+            gap: 1vw;
+        }
+        .worker-screen .dep-row {
+            padding: 1.2vh 1.2vw;
+            gap: 1vw;
+        }
+        .worker-screen .dep-date {
+            font-size: clamp(0.8rem, 1.6vh, 1.1rem);
+        }
+        .worker-screen .dep-day {
+            font-size: clamp(0.65rem, 1.2vh, 0.85rem);
+        }
+        .worker-screen .dep-title {
+            font-size: clamp(0.9rem, 1.8vh, 1.25rem);
+        }
+        .worker-screen .dep-meta {
+            font-size: clamp(0.65rem, 1.2vh, 0.85rem);
+        }
+        .worker-screen .dep-badge {
+            font-size: clamp(0.65rem, 1.2vh, 0.85rem);
+            padding: 3px 8px;
+        }
+
+        /* ── Worker screen columns ────────────────────────────── */
+        .worker-col-header {
+            padding: 2vh 1.8vw;
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0; background: var(--surface2);
+            font-family: 'DM Mono', monospace; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            font-size: clamp(0.65rem, 1.2vw, 0.88rem); color: var(--text);
+        }
+        .worker-count-badge {
+            font-family: 'DM Mono', monospace; font-size: clamp(0.6rem, 1vw, 0.8rem);
+            background: rgba(167,139,250,0.1); color: var(--purple);
+            padding: 2px 10px; border-radius: 100px;
+        }
 
         /* ── Status select hover ──────────────────────────────── */
         html[data-theme="dark"] .status-select:hover { border-color: rgba(255,255,255,0.2) !important; color: var(--text) !important; }
@@ -285,10 +348,10 @@
     <header class="flex justify-between items-center mb-[2.5vh] flex-shrink-0 relative z-[1]">
         <div class="header-left flex items-baseline gap-[2vw]">
             <h1 class="text-clamp-h1 font-bold tracking-tighter leading-none uppercase"
-                x-text="t('screen'+activeScreen)">DASHBOARD</h1>
+                x-text="activeScreen >= 4 && activeWorker ? activeWorker.name : t('screen'+activeScreen)">DASHBOARD</h1>
             <span class="page-badge font-mono text-clamp-badge tracking-widest px-[14px] py-[5px] rounded-[100px]"
-                :class="{todo:activeScreen===1, orders:activeScreen===2, events:activeScreen===3}"
-                x-text="t('badge'+activeScreen)"></span>
+                :class="activeScreen===1?'todo':activeScreen===2?'orders':activeScreen===3?'events':'worker'"
+                x-text="activeScreen >= 4 ? t('workerScreenBadge') : t('badge'+activeScreen)"></span>
         </div>
         <div class="header-right flex items-center gap-[2vw]">
             <div class="sync-pill flex items-center gap-2 font-mono text-clamp-sync py-[7px] px-4 border border-current rounded-[100px] whitespace-nowrap font-medium"
@@ -339,22 +402,30 @@
                                 class="emp-header py-[2vh] px-[1.8vw] border-b border-border flex justify-between items-center flex-shrink-0 bg-surface2">
                                 <span class="emp-name text-clamp-emp-name font-bold uppercase tracking-widest font-mono"
                                     x-text="emp.name"></span>
-                                <span
-                                    class="emp-count font-mono text-clamp-emp-count bg-[rgba(37,99,235,0.1)] py-1 px-3 rounded-[100px] text-blue"
-                                    x-text="emp.tasks.length"></span>
+                                <div class="flex items-center gap-2">
+                                    <button @click.stop="setScreen(4 + ei)"
+                                        class="nav-btn flex items-center justify-center w-[28px] h-[28px] border-none bg-transparent rounded-[8px] cursor-pointer text-muted transition-all duration-200 ease-cubic hover:bg-[rgba(0,0,0,0.05)] hover:text-text"
+                                        title="Worker screen">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                    </button>
+                                    <span
+                                        class="emp-count font-mono text-clamp-emp-count bg-[rgba(37,99,235,0.1)] py-1 px-3 rounded-[100px] text-blue"
+                                        x-text="emp.tasks.length"></span>
+                                </div>
                             </div>
 
                             <!-- All tasks in ONE scrollable list -->
-                            <div
-                                class="emp-tasks flex-1 overflow-y-auto py-[1.5vh] px-[1.2vw] flex flex-col gap-[1.2vh]">
+                            <div class="emp-tasks flex-1 overflow-y-auto py-[1.5vh] px-[1.2vw] flex flex-col gap-[1.2vh]">
                                 <template x-for="(task, ti) in emp.tasks" :key="'t'+ti">
                                     <div class="task-card bg-surface2 border border-border py-[2vh] px-[1.2vw] flex flex-col gap-[1vh] min-h-auto h-auto animate-cardIn relative w-full"
                                         :class="{'is-urgent': task.isUrgent}"
                                         :style="`--prio-color:${task.color}; animation-delay:${ti*50}ms`">
                                         <div class="task-priority flex items-center gap-2">
                                             <div class="prio-dot w-[9px] h-[9px] rounded-full flex-shrink-0"></div>
-                                            <span
-                                                class="prio-label font-mono text-clamp-prio uppercase tracking-widest font-medium"
+                                            <span class="prio-label font-mono text-clamp-prio uppercase tracking-widest font-medium"
                                                 x-text="task.priority"></span>
                                         </div>
                                         <div class="task-text text-clamp-task-text font-semibold leading-snug text-text break-words whitespace-normal overflow-visible"
@@ -400,7 +471,7 @@
                         <div class="kpi-sub font-mono text-clamp-kpi-sub text-muted" x-text="t('kpiCurrentlyActive')"></div>
                     </div>
                     <div class="kpi-divider h-px bg-border my-[0.3vh]"></div>
-                    <div class="legend flex flex-col gap-[clamp(0.4rem,1vh,0.8rem)] mt-auto">
+                    <div class="legend flex flex-col gap-[clamp(0.4rem,1vh,0.8rem)] mt-auto pb-[1.5vh]">
                         <div class="kpi-label font-mono text-clamp-kpi-label text-muted uppercase tracking-widest" x-text="t('kpiLegend')"></div>
                         <div class="legend-item flex items-center gap-[10px] font-mono text-clamp-legend text-muted">
                             <span class="legend-dot w-[10px] h-[10px] rounded-full flex-shrink-0"
@@ -621,6 +692,115 @@
             </div>
         </div>
 
+        <!-- ── SCREEN WORKER (dynamic, one per employee) ────────────────────── -->
+        <div class="screen-slot worker-screen" x-show="activeScreen >= 4"
+            x-transition:enter="screen-fade-enter-active" x-transition:enter-start="screen-fade-enter"
+            x-transition:leave="screen-fade-exit-active" x-transition:leave-start="screen-fade-exit">
+
+            <template x-if="activeWorker">
+                <div class="main-content flex-1 flex gap-[2vw] overflow-hidden relative z-[1] min-h-0">
+
+                    <!-- Column 1: Tasks -->
+                    <div class="todo emp-col flex-1 min-w-0 max-w-none bg-surface border border-border shadow-card flex flex-col">
+                        <div class="emp-header py-[2vh] px-[1.8vw] border-b border-border flex justify-between items-center flex-shrink-0 bg-surface2">
+                            <span class="emp-name text-clamp-emp-name font-bold uppercase tracking-widest font-mono"
+                                x-text="activeWorker.name"></span>
+                            <span class="emp-count font-mono text-clamp-emp-count bg-[rgba(37,99,235,0.1)] py-1 px-3 rounded-[100px] text-blue"
+                                x-text="activeWorker.tasks.length"></span>
+                        </div>
+                        <div class="emp-tasks flex-1 overflow-y-auto py-[1.5vh] px-[1.2vw] flex flex-col gap-[1.2vh]">
+                            <template x-if="activeWorker.tasks.length === 0">
+                                <div class="flex items-center justify-center h-full font-mono text-muted uppercase tracking-widest text-sm opacity-50"
+                                    x-text="t('workerNoTasks')"></div>
+                            </template>
+                            <template x-for="(task, ti) in activeWorker.tasks" :key="'wt'+ti">
+                                <div class="task-card bg-surface2 border border-border py-[2vh] px-[1.2vw] flex flex-col gap-[1vh] min-h-auto h-auto animate-cardIn relative w-full"
+                                    :class="{'is-urgent': task.isUrgent}"
+                                    :style="`--prio-color:${task.color}; animation-delay:${ti*50}ms`">
+                                    <div class="task-priority flex items-center gap-2">
+                                        <div class="prio-dot w-[9px] h-[9px] rounded-full flex-shrink-0"></div>
+                                        <span class="prio-label font-mono text-clamp-prio uppercase tracking-widest font-medium"
+                                            x-text="task.priority"></span>
+                                    </div>
+                                    <div class="task-text text-clamp-task-text font-semibold leading-snug text-text break-words whitespace-normal overflow-visible"
+                                        x-text="task.text"></div>
+                                    <div class="task-deadline flex items-center gap-2 font-mono text-clamp-task-deadline text-red bg-[rgba(220,38,38,0.05)] py-1 px-[10px] rounded font-medium"
+                                        x-show="task.deadlineDay || task.deadlineTime">
+                                        <span x-text="task.deadlineDay"></span>
+                                        <span x-show="task.deadlineDay && task.deadlineTime"> · </span>
+                                        <span x-text="task.deadlineTime"></span>
+                                    </div>
+                                    <div class="task-status font-mono text-clamp-task-status text-muted uppercase tracking-widest mt-auto"
+                                        x-text="task.status"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Meetings & Events -->
+                    <div class="events flex-1 flex flex-col min-w-0 bg-surface border border-border shadow-card"
+                        style="border-radius:16px; overflow:hidden;">
+                        <div class="worker-col-header">
+                            <span x-text="t('workerMeetingsTitle')"></span>
+                            <span class="worker-count-badge"
+                                x-text="workerMeetings(activeWorker.name).today.length + workerMeetings(activeWorker.name).upcoming.length"></span>
+                        </div>
+                        <div class="event-list">
+                            <template x-if="workerMeetings(activeWorker.name).today.length === 0 && workerMeetings(activeWorker.name).upcoming.length === 0">
+                                <div class="empty-state">
+                                    <div class="empty-icon">🗓</div>
+                                    <div x-text="t('workerNoMeetings')"></div>
+                                </div>
+                            </template>
+
+                            <!-- Today's events -->
+                            <template x-for="(e, ei) in workerMeetings(activeWorker.name).today" :key="'wme'+ei">
+                                <div class="event-card-today" :style="`animation-delay:${ei*50}ms`">
+                                    <div class="ev-time" x-text="e.time || 'TBD'"></div>
+                                    <div class="ev-title-today" x-text="e.title"></div>
+                                    <div class="ev-meta">
+                                        <span x-show="e.place">📍 <span x-text="e.place"></span></span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Upcoming events -->
+                            <template x-for="(e, ei) in workerMeetings(activeWorker.name).upcoming" :key="'wmu'+ei">
+                                <div class="dep-row" :style="`animation-delay:${ei*50}ms`">
+                                    <div>
+                                        <div class="dep-date" x-text="e.dateLabel"></div>
+                                        <div class="dep-day" x-text="e.dayName"></div>
+                                    </div>
+                                    <div>
+                                        <div class="dep-title" x-text="e.title"></div>
+                                        <div class="dep-meta"
+                                            x-text="[e.time, e.place].filter(Boolean).join(' · ')"></div>
+                                    </div>
+                                    <div class="dep-badge" :class="e.badgeClass"
+                                        x-text="e.days===1?t('evTomorrow'):e.days===0?t('evToday'):t('evInDays').replace('{n}',e.days)"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Holidays (placeholder) -->
+                    <div class="flex flex-col bg-surface border border-border shadow-card"
+                        style="border-radius:16px; overflow:hidden; width:clamp(180px,22vw,280px); flex-shrink:0;">
+                        <div class="worker-col-header">
+                            <span x-text="t('workerHolidaysTitle')"></span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center flex-col gap-4" style="opacity:0.35">
+                            <span style="font-size:3rem">🏖️</span>
+                            <span class="font-mono text-muted uppercase tracking-widest"
+                                style="font-size:clamp(0.6rem,1vw,0.75rem)"
+                                x-text="t('workerHolidaysComingSoon')"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+
     </div><!-- /screen-container -->
 
     <!-- STATUS BAR -->
@@ -688,6 +868,12 @@
                     <option value="1" :selected="activeScreen===1" x-text="t('scr1')"></option>
                     <option value="2" :selected="activeScreen===2" x-text="t('scr2')"></option>
                     <option value="3" :selected="activeScreen===3" x-text="t('scr3')"></option>
+                    <template x-if="todo.employees.length > 0">
+                        <option disabled>──────────</option>
+                    </template>
+                    <template x-for="(emp, wi) in todo.employees" :key="'ws'+emp.name">
+                        <option :value="4 + wi" :selected="activeScreen === 4 + wi" x-text="'👤 ' + emp.name"></option>
+                    </template>
                 </select>
                 <!-- Separator -->
                 <div class="w-px bg-border flex-shrink-0" style="height:60%;margin:0 2px"></div>
