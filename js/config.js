@@ -102,7 +102,7 @@ const TRANSLATIONS = {
         evNoToday: 'No events today',
         evNoUpcoming: 'No upcoming events',
         evTomorrow: 'TOMORROW',
-        evInDays: 'IN {n}D',
+        evInDays: 'IN {n} DAYS',
         // Toasts
         toastFallbackTitle: 'Fallback Mode',
         toastFallbackMsg: 'Proxy unavailable — fetching directly from Google Sheets (data may be slightly stale)',
@@ -193,7 +193,7 @@ const TRANSLATIONS = {
         evNoToday: 'Sin eventos hoy',
         evNoUpcoming: 'Sin eventos próximos',
         evTomorrow: 'MAÑANA',
-        evInDays: 'EN {n}D',
+        evInDays: 'EN {n} DIAS',
         // Toasts
         toastFallbackTitle: 'Modo Alternativo',
         toastFallbackMsg: 'Proxy no disponible — obteniendo datos directamente de Google Sheets (pueden estar levemente desactualizados)',
