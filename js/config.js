@@ -18,9 +18,10 @@ const CONFIG = {
     // Data may be slightly stale (Google CDN cache, up to ~1 min).
     spreadsheetBase: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQWIsIYz5xz3NNvpet3VCSYBNp_epEm90SXC7oEvETucI9SBia7GbZkyNyRXEoFt02h9nqxPtsKTJm2/pub?output=csv',
     sheets: {
-        tasks:  '&gid=0',
-        orders: '&gid=859622579',
-        events: '&gid=2006704627',
+        tasks:    '&gid=0',
+        orders:   '&gid=859622579',
+        events:   '&gid=2006704627',
+        machines: '&gid=348601046',
     },
 
     // Auto-rotation interval in seconds
@@ -34,6 +35,8 @@ const CONFIG = {
         { id: 1, title: 'TO DO LIST',        badge: 'SCREEN 01' },
         { id: 2, title: 'ORDERS DASHBOARD',  badge: 'SCREEN 02' },
         { id: 3, title: 'SCHEDULED EVENTS',  badge: 'SCREEN 03' },
+        { id: 4, title: 'MACHINES',          badge: 'SCREEN 04' },
+        { id: 5, title: 'LEADS',             badge: 'SCREEN 05' },
     ],
 
     // Priority colors (light theme)
@@ -63,10 +66,14 @@ const TRANSLATIONS = {
         scr1: 'SCR 01 · TODO',
         scr2: 'SCR 02 · ORDERS',
         scr3: 'SCR 03 · EVENTS',
+        scr4: 'SCR 04 · MACHINES',
+        scr5: 'SCR 05 · LEADS',
         // Screen titles + badges
-        screen1: 'TO DO LIST',      badge1: 'SCREEN 01',
+        screen1: 'TO DO LIST',       badge1: 'SCREEN 01',
         screen2: 'ORDERS DASHBOARD', badge2: 'SCREEN 02',
         screen3: 'SCHEDULED EVENTS', badge3: 'SCREEN 03',
+        screen4: 'MACHINES',         badge4: 'SCREEN 04',
+        screen5: 'LEADS',            badge5: 'SCREEN 05',
         // Screen 1 — TODO
         loading: 'FETCHING DATA…',
         noActiveTasks: 'No active tasks',
@@ -114,6 +121,21 @@ const TRANSLATIONS = {
         toastShipMsg: '{n} order shipping today',
         toastShipMsgPlural: '{n} orders shipping today',
         toastEventTitle: 'New Event Today',
+        // Screen 4 — MACHINES
+        thMachId: 'ID',
+        thMachTech: 'TECHNOLOGY',
+        thMachName: 'MACHINE',
+        thMachCurrent: 'CURRENT JOB',
+        thMachNext: 'NEXT JOB',
+        thMachProblem: 'LAST PROBLEM',
+        machNoData: 'No machines data',
+        // Screen 5 — LEADS
+        leadCol1: 'CONTACT DONE',
+        leadCol2: 'MEETING PROGRAMMED',
+        leadCol3: 'QUOTE SENT',
+        leadCol4: 'PENDING PROTOTYPES',
+        leadCol5: 'WAITING ANSWER',
+        leadEmpty: 'No leads',
         // Worker screens
         workerScreenBadge: 'WORKER',
         workerTasksTitle: 'Tasks',
@@ -162,10 +184,14 @@ const TRANSLATIONS = {
         scr1: 'PNT 01 · TAREAS',
         scr2: 'PNT 02 · PEDIDOS',
         scr3: 'PNT 03 · EVENTOS',
+        scr4: 'PNT 04 · MÁQUINAS',
+        scr5: 'PNT 05 · LEADS',
         // Screen titles + badges
-        screen1: 'LISTA DE TAREAS',     badge1: 'PANTALLA 01',
+        screen1: 'LISTA DE TAREAS',      badge1: 'PANTALLA 01',
         screen2: 'PEDIDOS',              badge2: 'PANTALLA 02',
         screen3: 'EVENTOS PROGRAMADOS',  badge3: 'PANTALLA 03',
+        screen4: 'MÁQUINAS',             badge4: 'PANTALLA 04',
+        screen5: 'LEADS',                badge5: 'PANTALLA 05',
         // Screen 1 — TODO
         loading: 'CARGANDO DATOS…',
         noActiveTasks: 'Sin tareas activas',
@@ -213,6 +239,21 @@ const TRANSLATIONS = {
         toastShipMsg: '{n} pedido listo para envío hoy',
         toastShipMsgPlural: '{n} pedidos listos para envío hoy',
         toastEventTitle: 'Nuevo Evento Hoy',
+        // Screen 4 — MACHINES
+        thMachId: 'ID',
+        thMachTech: 'TECNOLOGÍA',
+        thMachName: 'MÁQUINA',
+        thMachCurrent: 'TRABAJO ACTUAL',
+        thMachNext: 'TRABAJO SIGUIENTE',
+        thMachProblem: 'ÚLTIMO PROBLEMA',
+        machNoData: 'Sin datos de máquinas',
+        // Screen 5 — LEADS
+        leadCol1: 'CONTACTO HECHO',
+        leadCol2: 'REUNIÓN PROGRAMADA',
+        leadCol3: 'COTIZACIÓN ENVIADA',
+        leadCol4: 'PROTOTIPOS PENDIENTES',
+        leadCol5: 'ESPERANDO RESPUESTA',
+        leadEmpty: 'Sin leads',
         // Worker screens
         workerScreenBadge: 'TRABAJADOR',
         workerTasksTitle: 'Tareas',

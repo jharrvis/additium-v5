@@ -22,6 +22,7 @@ function spaDashboard() {
         statusBarVisible: true,
         _rotateCustom: false,
         _refreshCustom: false,
+        ctxMenu: { show: false, x: 0, y: 0 },
 
         settings: {
             showCountdown: false,
@@ -37,6 +38,16 @@ function spaDashboard() {
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
         orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0 },
         events: { today: [], upcoming: [], prevTodayCount: 0 },
+        machines: { list: [] },
+        leads: {
+            columns: [
+                { key: 'contact',    items: [] },
+                { key: 'meeting',    items: [] },
+                { key: 'quote',      items: [] },
+                { key: 'prototypes', items: [] },
+                { key: 'waiting',    items: [] },
+            ]
+        },
 
         async init() {
             this.loadSettings();
@@ -56,6 +67,8 @@ function spaDashboard() {
             this.$watch('settings.darkMode', (val) => this.applyDarkMode(val));
             // Auto-hide status bar: always show on load, then hide after 2 seconds
             setTimeout(() => { this.statusBarVisible = false; }, 2000);
+            // Context menu handler
+            this.initContextMenu();
         },
 
         startClock() {
@@ -133,14 +146,14 @@ function spaDashboard() {
             }, 50);
         },
 
-        nextScreen() { this.activeScreen = (this.activeScreen % 3) + 1; },
-        prevScreen() { this.activeScreen = this.activeScreen <= 1 ? 3 : this.activeScreen - 1; },
+        nextScreen() { this.activeScreen = (this.activeScreen % 5) + 1; },
+        prevScreen() { this.activeScreen = this.activeScreen <= 1 ? 5 : this.activeScreen - 1; },
         setScreen(id) { this.activeScreen = id; this.rotateCd = this.settings.rotateInterval; },
         togglePause() { this.paused = !this.paused; if (!this.paused) this.rotateCd = this.settings.rotateInterval; },
 
         get activeWorker() {
-            if (this.activeScreen < 4) return null;
-            return this.todo.employees[this.activeScreen - 4] || null;
+            if (this.activeScreen < 6) return null;
+            return this.todo.employees[this.activeScreen - 6] || null;
         },
 
         workerMeetings(workerName) {
@@ -292,14 +305,16 @@ function spaDashboard() {
 
         async fetchAllData() {
             try {
-                const [todoRaw, ordersRaw, eventsRaw] = await Promise.all([
+                const [todoRaw, ordersRaw, eventsRaw, machinesRaw] = await Promise.all([
                     this.fetchSheet('tasks'),
                     this.fetchSheet('orders'),
                     this.fetchSheet('events'),
+                    this.fetchSheet('machines'),
                 ]);
                 this.processTodo(this.parseCSV(todoRaw).slice(1));
                 this.processOrders(this.parseCSV(ordersRaw).slice(1));
                 this.processEvents(this.parseCSV(eventsRaw).slice(1));
+                this.processMachines(this.parseCSV(machinesRaw).slice(1));
                 this.lastSync = new Date().toLocaleTimeString('en-GB');
                 this.refreshKey++;
                 this.synced = true;
@@ -497,6 +512,79 @@ function spaDashboard() {
             if (this.refreshKey > 0 && today.length > this.events.prevTodayCount)
                 this.toast('📅', this.t('toastEventTitle'), today[today.length - 1].title, '#d97706');
             this.events.prevTodayCount = today.length;
-        }
+        },
+
+        // ─── Screen 04: MACHINES ────────────────────────────────────────────────────
+        processMachines(rows) {
+            const techClass = t => {
+                const u = (t || '').toUpperCase();
+                if (u.includes('MJF')) return 'tech-mjf';
+                if (u.includes('SLS')) return 'tech-sls';
+                if (u.includes('FDM')) return 'tech-fdm';
+                return 'tech-other';
+            };
+            this.machines.list = rows
+                .filter(r => (r[0] || '').trim() !== '')
+                .map(r => ({
+                    id:          (r[0] || '').trim(),
+                    tech:        (r[1] || '').trim(),
+                    techClass:   techClass(r[1]),
+                    machine:     (r[2] || '').trim(),
+                    brand:       (r[3] || '').trim(),
+                    currentJob:  (r[4] || '—').trim(),
+                    currentEnd:  (r[5] || '').trim(),
+                    nextJob:     (r[6] || '—').trim(),
+                    nextEnd:     (r[7] || '').trim(),
+                    lastProblem: (r[8] || '—').trim(),
+                }));
+        },
+
+        // ─── CONTEXT MENU ──────────────────────────────────────────────────────
+        initContextMenu() {
+            // Disable default context menu and show custom menu
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.showContextMenu(e.clientX, e.clientY);
+            });
+
+            // Hide context menu on click elsewhere
+            document.addEventListener('click', () => {
+                this.ctxMenu.show = false;
+            });
+
+            // Hide context menu on scroll
+            document.addEventListener('scroll', () => {
+                this.ctxMenu.show = false;
+            }, true);
+
+            // Hide context menu on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.ctxMenu.show = false;
+                }
+            });
+        },
+
+        showContextMenu(x, y) {
+            const menuWidth = 280;
+            const menuHeight = 320;
+            const padding = 10;
+
+            // Adjust position to keep menu within viewport
+            let newX = x;
+            let newY = y;
+
+            if (x + menuWidth + padding > window.innerWidth) {
+                newX = window.innerWidth - menuWidth - padding;
+            }
+
+            if (y + menuHeight + padding > window.innerHeight) {
+                newY = window.innerHeight - menuHeight - padding;
+            }
+
+            this.ctxMenu.x = newX;
+            this.ctxMenu.y = newY;
+            this.ctxMenu.show = true;
+        },
     };
 }
