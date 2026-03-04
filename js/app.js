@@ -591,5 +591,10 @@ function spaDashboard() {
             this.ctxMenu.y = newY;
             this.ctxMenu.show = true;
         },
+
+        reloadPage() {
+            // Hard refresh: clear cache and reload
+            window.location.reload(true);
+        },
     };
 }

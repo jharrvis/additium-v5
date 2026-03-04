@@ -537,6 +537,19 @@
         .ctx-select:focus {
             border-color: var(--blue);
         }
+        .ctx-btn-full {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
     </style>
 </head>
 
@@ -1373,6 +1386,18 @@
                 </button>
                 <span class="ctx-label">Settings</span>
             </div>
+        </div>
+
+        <!-- Reload Button (Full Width) -->
+        <div class="ctx-section" style="justify-content: center; margin-top: 8px;">
+            <button class="ctx-btn ctx-btn-full" @click="reloadPage()" title="Reload / Hard Refresh">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+                </svg>
+                <span>Reload</span>
+            </button>
         </div>
     </div>
 
