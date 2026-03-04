@@ -548,14 +548,12 @@ function spaDashboard() {
             });
 
             // Hide context menu on click elsewhere
-            document.addEventListener('click', () => {
-                this.ctxMenu.show = false;
+            document.addEventListener('click', (e) => {
+                // Don't close if clicking inside context menu
+                if (!e.target.closest('.context-menu')) {
+                    this.ctxMenu.show = false;
+                }
             });
-
-            // Hide context menu on scroll
-            document.addEventListener('scroll', () => {
-                this.ctxMenu.show = false;
-            }, true);
 
             // Hide context menu on Escape key
             document.addEventListener('keydown', (e) => {
@@ -563,6 +561,13 @@ function spaDashboard() {
                     this.ctxMenu.show = false;
                 }
             });
+
+            // Hide context menu on wheel scroll (user-initiated only)
+            let wheelTimeout;
+            document.addEventListener('wheel', () => {
+                this.ctxMenu.show = false;
+                clearTimeout(wheelTimeout);
+            }, { passive: true });
         },
 
         showContextMenu(x, y) {
