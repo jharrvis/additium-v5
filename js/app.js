@@ -411,7 +411,7 @@ function spaDashboard() {
         processOrders(rows) {
             const COLS = { id: 0, client: 1, date: 2, importance: 3, status: 4 };
             const CAT_ORDER = { shipping: 0, production: 1, pending: 2, done: 3 };
-            const valid = rows.filter((r, i) => i > 0 && (r[COLS.id] || '').trim() !== '' && !(r[COLS.id] || '').toLowerCase().includes('pedido'));
+            const valid = rows.filter(r => (r[COLS.id] || '').trim() !== '');
             let shipCount = 0, prodCount = 0, pendCount = 0;
 
             const items = valid.map(r => {

@@ -12,9 +12,10 @@ const https = require('https');
 
 // Sheet name → GID mapping (keep in sync with config.js)
 const SHEETS = {
-    tasks:  '0',
-    orders: '859622579',
-    events: '2006704627',
+    tasks:    '0',
+    orders:   '859622579',
+    events:   '2006704627',
+    machines: '348601046',
 };
 
 const SPREADSHEET_BASE =

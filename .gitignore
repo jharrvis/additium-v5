@@ -1,5 +1,7 @@
 .vercel
+.claude/
 node_modules/
 original/
+additum3D.zip
 api/proxy.php
 api/.htaccess
