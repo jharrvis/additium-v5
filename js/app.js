@@ -108,15 +108,13 @@ function spaDashboard() {
         },
 
         initAutoScroll() {
-            // Delay auto-scroll for todo list by 30 seconds
-            let todoScrollEnabled = false;
-            setTimeout(() => { todoScrollEnabled = true; }, 30000);
-
             // Tick counter controls speed per element type (no fractional px issues).
-            // emp-tasks:  1px per 4 ticks (200ms) ≈ 5px/s  — very slow
-            // table-body: 1px per 6 ticks (300ms) ≈ 3px/s  — slow
-            // event-list: 1px per tick    (50ms)  ≈ 20px/s — normal
+            // emp-tasks:         1px per 4 ticks (200ms) ≈ 5px/s  — very slow, 5s initial delay
+            // table-body orders: 1px per 6 ticks (300ms) ≈ 3px/s  — slow, no delay
+            // table-body machines: 1px per 6 ticks (300ms) ≈ 3px/s — slow, 5s initial delay
+            // event-list:        1px per 3 ticks (150ms) ≈ 6px/s  — slow, 5s initial delay
             // Hover over any scrollable element pauses its scroll.
+            const DELAY_MS = 5000;
             let tick = 0;
             setInterval(() => {
                 tick++;
@@ -124,11 +122,20 @@ function spaDashboard() {
                     if (el.scrollHeight <= el.clientHeight) return;
                     if (el.matches(':hover')) return;
 
-                    if (el.classList.contains('emp-tasks')) {
-                        if (!todoScrollEnabled) return;
-                        if (tick % 4 !== 0) return;
-                    } else if (el.classList.contains('table-body')) {
-                        if (tick % 6 !== 0) return;
+                    const isMachines  = el.classList.contains('table-body') && !!el.closest('.machines');
+                    const isEmpTasks  = el.classList.contains('emp-tasks');
+                    const isEventList = el.classList.contains('event-list');
+                    const needsDelay  = isEmpTasks || isMachines || isEventList;
+
+                    // Speed throttle
+                    if (isEmpTasks  && tick % 4 !== 0) return;
+                    if (isEventList && tick % 3 !== 0) return;
+                    if (el.classList.contains('table-body') && tick % 6 !== 0) return;
+
+                    // 5s hold at top on first appearance and after each reset
+                    if (needsDelay) {
+                        if (!el.dataset.readyAt) el.dataset.readyAt = Date.now() + DELAY_MS;
+                        if (Date.now() < parseInt(el.dataset.readyAt)) return;
                     }
 
                     el.scrollTop += 1;
@@ -139,6 +146,7 @@ function spaDashboard() {
                             setTimeout(() => {
                                 el.scrollTop = 0;
                                 delete el.dataset.resetting;
+                                if (needsDelay) el.dataset.readyAt = Date.now() + DELAY_MS;
                             }, 3000);
                         }
                     }

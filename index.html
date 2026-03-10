@@ -469,58 +469,71 @@
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
             padding: 8px;
-            min-width: 280px;
+            min-width: 264px;
             display: none;
         }
         .context-menu.show { display: block; }
-        .ctx-section {
+        .ctx-nav {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            padding: 6px 0;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2px;
+            padding: 2px 0;
         }
-        .ctx-section + .ctx-section {
+        .ctx-divider {
+            border: none;
             border-top: 1px solid var(--border);
-            margin-top: 4px;
-            padding-top: 8px;
+            margin: 6px 0;
         }
         .ctx-btn {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
+            gap: 4px;
+            flex: 1;
+            height: 52px;
             border: none;
             background: transparent;
             border-radius: 8px;
             cursor: pointer;
             color: var(--muted);
-            transition: all 0.2s ease;
+            transition: background 0.15s, color 0.15s;
+            padding: 4px 2px;
         }
         .ctx-btn:hover {
             background: rgba(0,0,0,0.05);
             color: var(--text);
-            transform: translateY(-1px);
         }
         html[data-theme="dark"] .ctx-btn:hover {
             background: rgba(255,255,255,0.07);
         }
-        .ctx-btn:active {
-            transform: scale(0.95);
-        }
-        .ctx-label {
-            font-size: 10px;
+        .ctx-btn:active { transform: scale(0.93); }
+        .ctx-btn-label {
+            font-size: 9px;
             font-family: 'DM Mono', monospace;
-            color: var(--muted);
-            text-align: center;
-            margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            color: var(--muted);
+            line-height: 1;
         }
-        .ctx-item {
+        .ctx-dropdowns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 2px 0;
+        }
+        .ctx-field {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 4px;
+        }
+        .ctx-field-label {
+            font-size: 9px;
+            font-family: 'DM Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
         }
         .ctx-select {
             width: 100%;
@@ -534,22 +547,34 @@
             cursor: pointer;
             outline: none;
         }
-        .ctx-select:focus {
-            border-color: var(--blue);
-        }
-        .ctx-btn-full {
+        .ctx-select:focus { border-color: var(--blue); }
+        .ctx-btn-reload {
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 16px;
+            padding: 9px 16px;
             font-size: 11px;
             font-family: 'DM Mono', monospace;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: background 0.15s, color 0.15s;
         }
+        .ctx-btn-reload:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--text);
+        }
+        html[data-theme="dark"] .ctx-btn-reload:hover {
+            background: rgba(255,255,255,0.07);
+        }
+        .ctx-btn-reload:active { transform: scale(0.98); }
     </style>
 </head>
 
@@ -1283,122 +1308,98 @@
          :style="`left: ${ctxMenu.x}px; top: ${ctxMenu.y}px;`"
          @contextmenu.prevent.stop>
 
-        <!-- Navigation Section -->
-        <div class="ctx-section">
-            <div class="ctx-item">
-                <button class="ctx-btn" @click="setScreen(1)" title="Home">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                </button>
-                <span class="ctx-label">Home</span>
-            </div>
-            <div class="ctx-item">
-                <button class="ctx-btn" @click="prevScreen()" title="Previous">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                <span class="ctx-label">Prev</span>
-            </div>
-            <div class="ctx-item">
-                <button class="ctx-btn" :class="{ 'text-green': !paused }" @click="togglePause()" :title="paused?'Resume':'Pause'">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <g x-show="!paused">
-                            <rect x="6" y="4" width="4" height="16"></rect>
-                            <rect x="14" y="4" width="4" height="16"></rect>
-                        </g>
-                        <g x-show="paused">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </g>
-                    </svg>
-                </button>
-                <span class="ctx-label" x-text="paused ? 'Play' : 'Pause'"></span>
-            </div>
-            <div class="ctx-item">
-                <button class="ctx-btn" @click="nextScreen()" title="Next">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-                <span class="ctx-label">Next</span>
-            </div>
-        </div>
-
-        <!-- Screen Selector Section -->
-        <div class="ctx-section" style="flex-direction: column; align-items: stretch;">
-            <span class="ctx-label" style="text-align: left; margin-bottom: 6px;">Screen</span>
-            <select class="ctx-select" @change="setScreen(parseInt($event.target.value)); ctxMenu.show = false;">
-                <option value="1" :selected="activeScreen===1" x-text="t('scr1')"></option>
-                <option value="2" :selected="activeScreen===2" x-text="t('scr2')"></option>
-                <option value="3" :selected="activeScreen===3" x-text="t('scr3')"></option>
-                <option value="4" :selected="activeScreen===4" x-text="t('scr4')"></option>
-                <option value="5" :selected="activeScreen===5" x-text="t('scr5')"></option>
-                <template x-if="todo.employees.length > 0">
-                    <option disabled>──────────</option>
-                </template>
-                <template x-for="(emp, wi) in todo.employees" :key="'ws'+emp.name">
-                    <option :value="6 + wi" :selected="activeScreen === 6 + wi" x-text="'👤 ' + emp.name"></option>
-                </template>
-            </select>
-        </div>
-
-        <!-- Rotation Interval Section -->
-        <div class="ctx-section" style="flex-direction: column; align-items: stretch;">
-            <span class="ctx-label" style="text-align: left; margin-bottom: 6px;">Rotate</span>
-            <select class="ctx-select" @change="setRotateInterval(parseInt($event.target.value))">
-                <option value="15" :selected="settings.rotateInterval===15">15S</option>
-                <option value="30" :selected="settings.rotateInterval===30">30S</option>
-                <option value="45" :selected="settings.rotateInterval===45">45S</option>
-                <option value="60" :selected="settings.rotateInterval===60">60S</option>
-                <option value="90" :selected="settings.rotateInterval===90">90S</option>
-                <option value="120" :selected="settings.rotateInterval===120">120S</option>
-            </select>
-            <span class="ctx-label" x-show="settings.showCountdown" style="margin-top: 6px;" x-text="t('nextIn')+' '+rotateCd+'s'"></span>
-        </div>
-
-        <!-- Tools Section -->
-        <div class="ctx-section">
-            <div class="ctx-item">
-                <button class="ctx-btn" @click="toggleFullscreen()" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
-                    <svg x-show="!isFullscreen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
-                    </svg>
-                    <svg x-show="isFullscreen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="4 14 10 14 10 20"></polyline>
-                        <polyline points="20 10 14 10 14 4"></polyline>
-                        <line x1="10" y1="14" x2="3" y2="21"></line>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                    </svg>
-                </button>
-                <span class="ctx-label">Full</span>
-            </div>
-            <div class="ctx-item">
-                <button class="ctx-btn" :class="settingsOpen ? 'text-blue' : ''" @click="settingsOpen=true" :title="t('settTitle')">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path>
-                    </svg>
-                </button>
-                <span class="ctx-label">Settings</span>
-            </div>
-        </div>
-
-        <!-- Reload Button (Full Width) -->
-        <div class="ctx-section" style="justify-content: center; margin-top: 8px;">
-            <button class="ctx-btn ctx-btn-full" @click="reloadPage()" title="Reload / Hard Refresh">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <polyline points="1 20 1 14 7 14"></polyline>
-                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+        <!-- Nav row: Home · Prev · Pause · Next · Full · Settings -->
+        <div class="ctx-nav">
+            <button class="ctx-btn" @click="setScreen(1)" title="Home">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span>Reload</span>
+                <span class="ctx-btn-label">Home</span>
+            </button>
+            <button class="ctx-btn" @click="prevScreen()" title="Previous">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <span class="ctx-btn-label">Prev</span>
+            </button>
+            <button class="ctx-btn" :class="{ 'text-green': !paused }" @click="togglePause()" :title="paused?'Resume':'Pause'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <g x-show="!paused"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></g>
+                    <g x-show="paused"><polygon points="5 3 19 12 5 21 5 3"></polygon></g>
+                </svg>
+                <span class="ctx-btn-label" x-text="paused ? 'Play' : 'Pause'"></span>
+            </button>
+            <button class="ctx-btn" @click="nextScreen()" title="Next">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+                <span class="ctx-btn-label">Next</span>
+            </button>
+            <button class="ctx-btn" @click="toggleFullscreen()" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+                <svg x-show="!isFullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                <svg x-show="isFullscreen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline>
+                    <line x1="10" y1="14" x2="3" y2="21"></line><line x1="21" y1="3" x2="14" y2="10"></line>
+                </svg>
+                <span class="ctx-btn-label">Full</span>
+            </button>
+            <button class="ctx-btn" :class="settingsOpen ? 'text-blue' : ''" @click="settingsOpen=true" :title="t('settTitle')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path>
+                </svg>
+                <span class="ctx-btn-label">Settings</span>
             </button>
         </div>
+
+        <hr class="ctx-divider">
+
+        <!-- Screen + Rotate side by side -->
+        <div class="ctx-dropdowns">
+            <div class="ctx-field">
+                <span class="ctx-field-label">Screen</span>
+                <select class="ctx-select" @change="setScreen(parseInt($event.target.value)); ctxMenu.show = false;">
+                    <option value="1" :selected="activeScreen===1" x-text="t('scr1')"></option>
+                    <option value="2" :selected="activeScreen===2" x-text="t('scr2')"></option>
+                    <option value="3" :selected="activeScreen===3" x-text="t('scr3')"></option>
+                    <option value="4" :selected="activeScreen===4" x-text="t('scr4')"></option>
+                    <option value="5" :selected="activeScreen===5" x-text="t('scr5')"></option>
+                    <template x-if="todo.employees.length > 0">
+                        <option disabled>──────────</option>
+                    </template>
+                    <template x-for="(emp, wi) in todo.employees" :key="'ws'+emp.name">
+                        <option :value="6 + wi" :selected="activeScreen === 6 + wi" x-text="'👤 ' + emp.name"></option>
+                    </template>
+                </select>
+            </div>
+            <div class="ctx-field">
+                <span class="ctx-field-label">Rotate</span>
+                <select class="ctx-select" @change="setRotateInterval(parseInt($event.target.value))">
+                    <option value="15"  :selected="settings.rotateInterval===15">15s</option>
+                    <option value="30"  :selected="settings.rotateInterval===30">30s</option>
+                    <option value="45"  :selected="settings.rotateInterval===45">45s</option>
+                    <option value="60"  :selected="settings.rotateInterval===60">60s</option>
+                    <option value="90"  :selected="settings.rotateInterval===90">90s</option>
+                    <option value="120" :selected="settings.rotateInterval===120">120s</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="ctx-divider">
+
+        <!-- Reload -->
+        <button class="ctx-btn-reload" @click="reloadPage()" title="Reload / Hard Refresh">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+            </svg>
+            <span>Reload</span>
+        </button>
     </div>
 
     <!-- SETTINGS MODAL -->
