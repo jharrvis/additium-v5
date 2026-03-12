@@ -1579,6 +1579,31 @@
                     </div>
                 </div>
 
+                <!-- ── FULL WIDTH: Notifications ──────────────────────── -->
+                <div class="settings-full">
+                    <div class="settings-section-label" x-text="t('secNotifications')"></div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label" x-text="t('settBrowserNotifyLabel')"></div>
+                            <div class="settings-row-desc" x-text="t('settBrowserNotifyDesc')"></div>
+                        </div>
+                        <button class="tog" :class="settings.browserNotify ? 'on' : 'off'"
+                                @click="settings.browserNotify ? settings.browserNotify=false : requestBrowserNotify()">
+                            <span class="tog-thumb"></span>
+                        </button>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label" x-text="t('settEmailNotifyLabel')"></div>
+                            <div class="settings-row-desc" x-text="t('settEmailNotifyDesc')"></div>
+                        </div>
+                        <button class="tog" :class="settings.emailNotify ? 'on' : 'off'"
+                                @click="settings.emailNotify=!settings.emailNotify">
+                            <span class="tog-thumb"></span>
+                        </button>
+                    </div>
+                </div>
+
             </div><!-- /settings-body -->
 
             <!-- Footer -->

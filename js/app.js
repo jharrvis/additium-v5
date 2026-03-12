@@ -33,11 +33,13 @@ function spaDashboard() {
             clockFormat: '24h',
             lang: 'en',
             darkMode: false,
+            browserNotify: false,
+            emailNotify: false,
         },
 
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
-        orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0 },
-        events: { today: [], upcoming: [], prevTodayCount: 0 },
+        orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0, prevProd: 0 },
+        events: { today: [], upcoming: [], prevTodayCount: 0, prevUpcomingCount: 0 },
         machines: { list: [] },
         leads: {
             columns: [
@@ -254,6 +256,39 @@ function spaDashboard() {
             setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 5500);
         },
 
+        notify(icon, title, msg, color) {
+            this.toast(icon, title, msg, color);
+            if (this.settings.browserNotify && typeof Notification !== 'undefined' && Notification.permission === 'granted')
+                new Notification(title, { body: msg, icon: '/img/logo_additium.png' });
+            if (this.settings.emailNotify)
+                this.sendEmailNotify(icon, title, msg);
+        },
+
+        async requestBrowserNotify() {
+            if (typeof Notification === 'undefined') {
+                this.toast('⚠️', this.t('settNotifyDenied'), '', '#d97706');
+                return;
+            }
+            if (Notification.permission === 'granted') { this.settings.browserNotify = true; return; }
+            const p = await Notification.requestPermission();
+            if (p === 'granted') { this.settings.browserNotify = true; }
+            else { this.settings.browserNotify = false; this.toast('⚠️', this.t('settNotifyDenied'), '', '#d97706'); }
+        },
+
+        async sendEmailNotify(icon, title, msg) {
+            const key = 'additium_email_' + btoa(encodeURIComponent(title)).slice(0, 24);
+            const last = parseInt(localStorage.getItem(key) || '0');
+            if (Date.now() - last < 5 * 60 * 1000) return;
+            localStorage.setItem(key, Date.now());
+            try {
+                await fetch('/api/notify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ icon, title, msg }),
+                });
+            } catch (e) { console.warn('[email notify]', e.message); }
+        },
+
         parseCSV(t) {
             const rows = []; let row = [], cur = '', inQ = false;
             for (let i = 0; i < t.length; i++) {
@@ -411,7 +446,7 @@ function spaDashboard() {
             this.todo.kpiEmp = workers.length;
 
             if (this.refreshKey > 0 && urgCount > this.todo.prevUrgent)
-                this.toast('🚨', this.t('toastUrgentTitle'), (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount), '#dc2626');
+                this.notify('🚨', this.t('toastUrgentTitle'), (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount), '#dc2626');
             this.todo.prevUrgent = urgCount;
         },
 
@@ -465,8 +500,11 @@ function spaDashboard() {
             this.orders.valProd = prodCount;
             this.orders.valPend = pendCount;
             if (this.refreshKey > 0 && shipCount > this.orders.prevShip)
-                this.toast('🚚', this.t('toastShipTitle'), (shipCount > 1 ? this.t('toastShipMsgPlural') : this.t('toastShipMsg')).replace('{n}', shipCount), '#dc2626');
+                this.notify('🚚', this.t('toastShipTitle'), (shipCount > 1 ? this.t('toastShipMsgPlural') : this.t('toastShipMsg')).replace('{n}', shipCount), '#dc2626');
             this.orders.prevShip = shipCount;
+            if (this.refreshKey > 0 && prodCount > this.orders.prevProd)
+                this.notify('🏭', this.t('toastProdTitle'), (prodCount > 1 ? this.t('toastProdMsgPlural') : this.t('toastProdMsg')).replace('{n}', prodCount), '#2563eb');
+            this.orders.prevProd = prodCount;
         },
 
         // ─── Screen 03: EVENTS ──────────────────────────────────────────────────────
@@ -518,8 +556,11 @@ function spaDashboard() {
             this.events.today = today;
             this.events.upcoming = upcoming;
             if (this.refreshKey > 0 && today.length > this.events.prevTodayCount)
-                this.toast('📅', this.t('toastEventTitle'), today[today.length - 1].title, '#d97706');
+                this.notify('📅', this.t('toastEventTitle'), today[today.length - 1].title, '#d97706');
             this.events.prevTodayCount = today.length;
+            if (this.refreshKey > 0 && upcoming.length > this.events.prevUpcomingCount)
+                this.notify('🗓️', this.t('toastUpcomingTitle'), upcoming[upcoming.length - 1].title, '#7c3aed');
+            this.events.prevUpcomingCount = upcoming.length;
         },
 
         // ─── Screen 04: MACHINES ────────────────────────────────────────────────────

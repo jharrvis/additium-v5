@@ -10,6 +10,10 @@
       "dest": "/api/proxy.js"
     },
     {
+      "src": "/api/notify-email",
+      "dest": "/api/notify-email.js"
+    },
+    {
       "src": "/css/(.*)",
       "headers": { "cache-control": "public, max-age=31536000, immutable" },
       "dest": "/css/$1"
