@@ -36,9 +36,11 @@ function spaDashboard() {
             browserNotify: false,
             emailNotify: false,
             notifyEmail: 'julian@mcimedia.net',
+            workerEmailNotify: false,
+            workerEmails: {},
         },
 
-        todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
+        todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0, prevWorkerUrgent: {} },
         orders: { list: [], valShip: 0, valProd: 0, valPend: 0, prevShip: 0, prevProd: 0 },
         events: { today: [], upcoming: [], prevTodayCount: 0, prevUpcomingCount: 0 },
         machines: { list: [] },
@@ -313,6 +315,24 @@ function spaDashboard() {
             }
         },
 
+        async sendWorkerEmailNotify(workerName, urgCount) {
+            const email = (this.settings.workerEmails || {})[workerName];
+            if (!email || !email.includes('@')) return;
+            const msg = (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount);
+            try {
+                await fetch('/api/notify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        icon: '🚨',
+                        title: `[${workerName}] ${this.t('toastUrgentTitle')}`,
+                        msg,
+                        to: email,
+                    }),
+                });
+            } catch (e) { console.warn('[worker email]', e.message); }
+        },
+
         parseCSV(t) {
             const rows = []; let row = [], cur = '', inQ = false;
             for (let i = 0; i < t.length; i++) {
@@ -472,6 +492,18 @@ function spaDashboard() {
             if (this.refreshKey > 0 && urgCount > this.todo.prevUrgent)
                 this.notify('🚨', this.t('toastUrgentTitle'), (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount), '#dc2626');
             this.todo.prevUrgent = urgCount;
+
+            // Per-worker urgent notification
+            if (this.refreshKey > 0 && this.settings.workerEmailNotify) {
+                const newPrev = {};
+                this.todo.employees.forEach(emp => {
+                    const wUrg = emp.tasks.filter(t => t.isUrgent).length;
+                    newPrev[emp.name] = wUrg;
+                    const prevW = (this.todo.prevWorkerUrgent || {})[emp.name] || 0;
+                    if (wUrg > prevW) this.sendWorkerEmailNotify(emp.name, wUrg);
+                });
+                this.todo.prevWorkerUrgent = newPrev;
+            }
         },
 
         // ─── Screen 02: ORDERS ──────────────────────────────────────────────────────

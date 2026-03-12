@@ -139,6 +139,10 @@ const TRANSLATIONS = {
         settNotifyTestFail: 'Failed to send test email',
         settNotifyEmailLabel: 'Email Destination',
         settNotifyEmailDesc: 'Email address to receive notifications',
+        settWorkerEmailNotifyLabel: 'Worker Email Notifications',
+        settWorkerEmailNotifyDesc: 'Notify each worker by email when their urgent tasks increase',
+        settWorkerEmailPlaceholder: 'worker@email.com',
+        settWorkerEmailNoData: 'No workers loaded yet — wait for data sync',
         // Screen 4 — MACHINES
         thMachId: 'ID',
         thMachTech: 'TECHNOLOGY',
@@ -275,6 +279,10 @@ const TRANSLATIONS = {
         settNotifyTestFail: 'Error al enviar email de prueba',
         settNotifyEmailLabel: 'Email Destino',
         settNotifyEmailDesc: 'Dirección de email para recibir notificaciones',
+        settWorkerEmailNotifyLabel: 'Notificaciones Email por Trabajador',
+        settWorkerEmailNotifyDesc: 'Notifica a cada trabajador por email cuando sus tareas urgentes aumentan',
+        settWorkerEmailPlaceholder: 'trabajador@email.com',
+        settWorkerEmailNoData: 'Sin trabajadores cargados aún — espera la sincronización',
         // Screen 4 — MACHINES
         thMachId: 'ID',
         thMachTech: 'TECNOLOGÍA',
