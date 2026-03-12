@@ -8,8 +8,6 @@
  * Body: { icon, title, msg }
  */
 
-const TO_EMAIL = 'julian@mcimedia.net';
-
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -25,8 +23,9 @@ module.exports = async function handler(req, res) {
     let body = req.body || {};
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
 
-    const { icon = '🔔', title = 'Notification', msg = '', to = TO_EMAIL } = body;
-    const toEmail = (typeof to === 'string' && to.includes('@')) ? to : TO_EMAIL;
+    const { icon = '🔔', title = 'Notification', msg = '', to } = body;
+    const toEmail = (typeof to === 'string' && to.includes('@')) ? to : (process.env.NOTIFY_EMAIL || '');
+    if (!toEmail) return res.status(400).json({ error: 'No recipient email provided' });
     const timestamp = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
 
     const html = `
@@ -58,7 +57,7 @@ module.exports = async function handler(req, res) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'Additium Dashboard <onboarding@resend.dev>',
+                from: 'Additium Dashboard <notifications@flcr.my.id>',
                 to: [toEmail],
                 subject: `[Additium] ${title}`,
                 html,
