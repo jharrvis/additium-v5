@@ -19,9 +19,13 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
     const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: 'RESEND_API_KEY not configured' });
+    if (!apiKey) return res.status(500).json({ error: 'RESEND_API_KEY not configured in Vercel environment variables' });
 
-    const { icon = '🔔', title = 'Notification', msg = '', to = TO_EMAIL } = req.body || {};
+    // Vercel may pass body as string or object depending on runtime version
+    let body = req.body || {};
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+
+    const { icon = '🔔', title = 'Notification', msg = '', to = TO_EMAIL } = body;
     const toEmail = (typeof to === 'string' && to.includes('@')) ? to : TO_EMAIL;
     const timestamp = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
 
@@ -63,8 +67,9 @@ module.exports = async function handler(req, res) {
 
         const data = await r.json();
         if (!r.ok) {
-            console.error('[notify-email] Resend error:', data);
-            return res.status(502).json({ error: 'Resend API error', detail: data });
+            const detail = data?.message || data?.name || JSON.stringify(data);
+            console.error('[notify-email] Resend error:', detail);
+            return res.status(502).json({ error: detail });
         }
         return res.status(200).json({ ok: true, id: data.id });
     } catch (err) {

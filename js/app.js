@@ -306,8 +306,9 @@ function spaDashboard() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ icon, title, msg, to: this.settings.notifyEmail }),
                     });
+                    const data = await r.json().catch(() => ({}));
                     if (r.ok) this.toast('✅', this.t('settNotifyTestSent'), this.settings.notifyEmail, '#16a34a');
-                    else this.toast('❌', this.t('settNotifyTestFail'), '', '#dc2626');
+                    else this.toast('❌', this.t('settNotifyTestFail'), data.error || `HTTP ${r.status}`, '#dc2626');
                 } catch (e) { this.toast('❌', this.t('settNotifyTestFail'), e.message, '#dc2626'); }
             }
         },
