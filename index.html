@@ -254,6 +254,24 @@
             font-size: 12px; font-family: 'DM Mono', monospace;
             color: var(--muted); margin-top: 3px; line-height: 1.4;
         }
+        .settings-input {
+            flex: 1; max-width: 260px;
+            font-family: 'DM Mono', monospace; font-size: 12px;
+            background: var(--bg); color: var(--text);
+            border: 1px solid var(--border); border-radius: 7px;
+            padding: 7px 10px; outline: none;
+        }
+        .settings-input:focus { border-color: var(--blue); }
+        .settings-test-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: 7px; border: 1px solid var(--border);
+            background: transparent; cursor: pointer; color: var(--muted);
+            font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .settings-test-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+        html[data-theme="dark"] .settings-test-btn:hover { background: var(--blue); }
         /* Toggle switch */
         .tog {
             position: relative; width: 44px; height: 24px;
@@ -1582,25 +1600,48 @@
                 <!-- ── FULL WIDTH: Notifications ──────────────────────── -->
                 <div class="settings-full">
                     <div class="settings-section-label" x-text="t('secNotifications')"></div>
+
+                    <!-- Browser / OS -->
                     <div class="settings-row">
                         <div>
                             <div class="settings-row-label" x-text="t('settBrowserNotifyLabel')"></div>
                             <div class="settings-row-desc" x-text="t('settBrowserNotifyDesc')"></div>
                         </div>
-                        <button class="tog" :class="settings.browserNotify ? 'on' : 'off'"
-                                @click="settings.browserNotify ? settings.browserNotify=false : requestBrowserNotify()">
-                            <span class="tog-thumb"></span>
-                        </button>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <button class="settings-test-btn" x-show="settings.browserNotify"
+                                    @click="testNotify('browser')" x-text="t('settNotifyTest')"></button>
+                            <button class="tog" :class="settings.browserNotify ? 'on' : 'off'"
+                                    @click="settings.browserNotify ? settings.browserNotify=false : requestBrowserNotify()">
+                                <span class="tog-thumb"></span>
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Email -->
                     <div class="settings-row">
                         <div>
                             <div class="settings-row-label" x-text="t('settEmailNotifyLabel')"></div>
                             <div class="settings-row-desc" x-text="t('settEmailNotifyDesc')"></div>
                         </div>
-                        <button class="tog" :class="settings.emailNotify ? 'on' : 'off'"
-                                @click="settings.emailNotify=!settings.emailNotify">
-                            <span class="tog-thumb"></span>
-                        </button>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <button class="settings-test-btn" x-show="settings.emailNotify"
+                                    @click="testNotify('email')" x-text="t('settNotifyTest')"></button>
+                            <button class="tog" :class="settings.emailNotify ? 'on' : 'off'"
+                                    @click="settings.emailNotify=!settings.emailNotify">
+                                <span class="tog-thumb"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Email destination input -->
+                    <div class="settings-row" x-show="settings.emailNotify">
+                        <div>
+                            <div class="settings-row-label" x-text="t('settNotifyEmailLabel')"></div>
+                            <div class="settings-row-desc" x-text="t('settNotifyEmailDesc')"></div>
+                        </div>
+                        <input class="settings-input" type="email"
+                               x-model="settings.notifyEmail"
+                               placeholder="email@example.com">
                     </div>
                 </div>
 

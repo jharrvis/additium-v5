@@ -21,7 +21,8 @@ module.exports = async function handler(req, res) {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'RESEND_API_KEY not configured' });
 
-    const { icon = '🔔', title = 'Notification', msg = '' } = req.body || {};
+    const { icon = '🔔', title = 'Notification', msg = '', to = TO_EMAIL } = req.body || {};
+    const toEmail = (typeof to === 'string' && to.includes('@')) ? to : TO_EMAIL;
     const timestamp = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
 
     const html = `
@@ -54,7 +55,7 @@ module.exports = async function handler(req, res) {
             },
             body: JSON.stringify({
                 from: 'Additium Dashboard <onboarding@resend.dev>',
-                to: [TO_EMAIL],
+                to: [toEmail],
                 subject: `[Additium] ${title}`,
                 html,
             }),

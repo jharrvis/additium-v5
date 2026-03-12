@@ -35,6 +35,7 @@ function spaDashboard() {
             darkMode: false,
             browserNotify: false,
             emailNotify: false,
+            notifyEmail: 'julian@mcimedia.net',
         },
 
         todo: { employees: [], kpiOpen: 0, kpiUrgent: 0, kpiProg: 0, kpiEmp: 0, prevUrgent: 0 },
@@ -284,9 +285,31 @@ function spaDashboard() {
                 await fetch('/api/notify-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ icon, title, msg }),
+                    body: JSON.stringify({ icon, title, msg, to: this.settings.notifyEmail }),
                 });
             } catch (e) { console.warn('[email notify]', e.message); }
+        },
+
+        async testNotify(channel) {
+            const icon = '🔔', title = this.t('settNotifyTestTitle'), msg = this.t('settNotifyTestMsg');
+            if (channel === 'browser') {
+                if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+                    await this.requestBrowserNotify();
+                }
+                if (Notification.permission === 'granted') new Notification(title, { body: msg, icon: '/img/logo_additium.png' });
+                this.toast(icon, title, msg, '#2563eb');
+            } else if (channel === 'email') {
+                this.toast('📧', this.t('settNotifyTestSending'), this.settings.notifyEmail, '#2563eb');
+                try {
+                    const r = await fetch('/api/notify-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ icon, title, msg, to: this.settings.notifyEmail }),
+                    });
+                    if (r.ok) this.toast('✅', this.t('settNotifyTestSent'), this.settings.notifyEmail, '#16a34a');
+                    else this.toast('❌', this.t('settNotifyTestFail'), '', '#dc2626');
+                } catch (e) { this.toast('❌', this.t('settNotifyTestFail'), e.message, '#dc2626'); }
+            }
         },
 
         parseCSV(t) {
