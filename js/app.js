@@ -315,10 +315,15 @@ function spaDashboard() {
             }
         },
 
-        async sendWorkerEmailNotify(workerName, urgCount) {
+        async sendWorkerEmailNotify(workerName, urgTasks) {
             const email = (this.settings.workerEmails || {})[workerName];
             if (!email || !email.includes('@')) return;
+            const urgCount = urgTasks.length;
             const msg = (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount);
+            const tasks = urgTasks.map(t => ({
+                text: t.text,
+                deadline: [t.deadlineDay, t.deadlineTime].filter(Boolean).join(' ') || '—',
+            }));
             try {
                 await fetch('/api/notify-email', {
                     method: 'POST',
@@ -327,6 +332,7 @@ function spaDashboard() {
                         icon: '🚨',
                         title: `[${workerName}] ${this.t('toastUrgentTitle')}`,
                         msg,
+                        tasks,
                         to: email,
                     }),
                 });
@@ -497,10 +503,10 @@ function spaDashboard() {
             if (this.refreshKey > 0 && this.settings.workerEmailNotify) {
                 const newPrev = {};
                 this.todo.employees.forEach(emp => {
-                    const wUrg = emp.tasks.filter(t => t.isUrgent).length;
-                    newPrev[emp.name] = wUrg;
+                    const urgTasks = emp.tasks.filter(t => t.isUrgent);
+                    newPrev[emp.name] = urgTasks.length;
                     const prevW = (this.todo.prevWorkerUrgent || {})[emp.name] || 0;
-                    if (wUrg > prevW) this.sendWorkerEmailNotify(emp.name, wUrg);
+                    if (urgTasks.length > prevW) this.sendWorkerEmailNotify(emp.name, urgTasks);
                 });
                 this.todo.prevWorkerUrgent = newPrev;
             }

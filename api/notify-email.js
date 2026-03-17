@@ -5,7 +5,7 @@
  * Requires RESEND_API_KEY environment variable set in Vercel project settings.
  *
  * Endpoint: POST /api/notify-email
- * Body: { icon, title, msg }
+ * Body: { icon, title, msg, tasks?: [{text, deadline}] }
  */
 
 module.exports = async function handler(req, res) {
@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
     let body = req.body || {};
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
 
-    const { icon = '🔔', title = 'Notification', msg = '', to } = body;
+    const { icon = '🔔', title = 'Notification', msg = '', to, tasks } = body;
     const toEmail = (typeof to === 'string' && to.includes('@')) ? to : (process.env.NOTIFY_EMAIL || '');
     if (!toEmail) return res.status(400).json({ error: 'No recipient email provided' });
     const timestamp = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
@@ -40,7 +40,23 @@ module.exports = async function handler(req, res) {
     </div>
     <div style="padding:24px">
       <h2 style="margin:0 0 8px;color:#0f172a;font-size:18px">${title}</h2>
-      <p style="margin:0;color:#64748b;font-size:14px;line-height:1.6">${msg}</p>
+      <p style="margin:0 0 ${Array.isArray(tasks) && tasks.length ? '16px' : '0'};color:#64748b;font-size:14px;line-height:1.6">${msg}</p>
+      ${Array.isArray(tasks) && tasks.length ? `
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:#f1f5f9">
+            <th style="text-align:left;padding:6px 10px;color:#475569;font-weight:600;border-bottom:1px solid #e2e8f0">Tarea</th>
+            <th style="text-align:left;padding:6px 10px;color:#475569;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap">Vencimiento</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tasks.map((t, i) => `
+          <tr style="background:${i % 2 === 0 ? '#fff' : '#f8fafc'}">
+            <td style="padding:7px 10px;color:#1e293b;border-bottom:1px solid #f1f5f9">${t.text}</td>
+            <td style="padding:7px 10px;color:#dc2626;font-family:monospace;border-bottom:1px solid #f1f5f9;white-space:nowrap">${t.deadline}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>` : ''}
     </div>
     <div style="padding:12px 24px;background:#f8fafc;border-top:1px solid #e2e8f0">
       <small style="color:#94a3b8;font-size:11px;font-family:monospace">${timestamp}</small>
