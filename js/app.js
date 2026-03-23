@@ -259,12 +259,12 @@ function spaDashboard() {
             setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 5500);
         },
 
-        notify(icon, title, msg, color) {
+        notify(icon, title, msg, color, tasks) {
             this.toast(icon, title, msg, color);
             if (this.settings.browserNotify && typeof Notification !== 'undefined' && Notification.permission === 'granted')
                 new Notification(title, { body: msg, icon: '/img/logo_additium.png' });
             if (this.settings.emailNotify)
-                this.sendEmailNotify(icon, title, msg);
+                this.sendEmailNotify(icon, title, msg, tasks);
         },
 
         async requestBrowserNotify() {
@@ -278,7 +278,7 @@ function spaDashboard() {
             else { this.settings.browserNotify = false; this.toast('⚠️', this.t('settNotifyDenied'), '', '#d97706'); }
         },
 
-        async sendEmailNotify(icon, title, msg) {
+        async sendEmailNotify(icon, title, msg, tasks) {
             const key = 'additium_email_' + btoa(encodeURIComponent(title)).slice(0, 24);
             const last = parseInt(localStorage.getItem(key) || '0');
             if (Date.now() - last < 5 * 60 * 1000) return;
@@ -287,7 +287,7 @@ function spaDashboard() {
                 await fetch('/api/notify-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ icon, title, msg, to: this.settings.notifyEmail }),
+                    body: JSON.stringify({ icon, title, msg, tasks, to: this.settings.notifyEmail }),
                 });
             } catch (e) { console.warn('[email notify]', e.message); }
         },
@@ -495,8 +495,15 @@ function spaDashboard() {
             }).length;
             this.todo.kpiEmp = workers.length;
 
-            if (this.refreshKey > 0 && urgCount > this.todo.prevUrgent)
-                this.notify('🚨', this.t('toastUrgentTitle'), (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount), '#dc2626');
+            if (this.refreshKey > 0 && urgCount > this.todo.prevUrgent) {
+                const allUrgTasks = this.todo.employees.flatMap(emp =>
+                    emp.tasks.filter(t => t.isUrgent).map(t => ({
+                        text: `[${emp.name}] ${t.text}`,
+                        deadline: [t.deadlineDay, t.deadlineTime].filter(Boolean).join(' ') || '—',
+                    }))
+                );
+                this.notify('🚨', this.t('toastUrgentTitle'), (urgCount > 1 ? this.t('toastUrgentMsgPlural') : this.t('toastUrgentMsg')).replace('{n}', urgCount), '#dc2626', allUrgTasks);
+            }
             this.todo.prevUrgent = urgCount;
 
             // Per-worker urgent notification
