@@ -237,6 +237,21 @@ module.exports = async function handler(req, res) {
         }
 
         console.log('[cron-reminders] done:', JSON.stringify(results));
+
+        // Debug mode: ?debug=1 returns full parsed data without sending emails
+        const isDebug = (req.query && req.query.debug === '1');
+        if (isDebug) {
+            return res.status(200).json({
+                debug: true,
+                today: todayStr,
+                tomorrow: tomorrowStr,
+                isMonday,
+                workerEmails,
+                byWorker,
+                mainEmail: mainEmail || null,
+            });
+        }
+
         return res.status(200).json({ ok: true, sent: results.length, results });
 
     } catch (err) {
