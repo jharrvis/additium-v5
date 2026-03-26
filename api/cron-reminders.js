@@ -156,7 +156,12 @@ module.exports = async function handler(req, res) {
     try {
         // 1. Fetch worker email map from Trabajadores sheet
         const workerCSV = await fetchText(SPREADSHEET_BASE + GID_TRABAJADORES + '&t=' + Date.now());
-        const workerRows = parseCSV(workerCSV).slice(1); // skip header
+        const workerAllRows = parseCSV(workerCSV);
+        // Skip header row — but handle both "NAME,EMAIL" header and headerless sheets
+        const workerRows = workerAllRows.filter(r => {
+            const col0 = (r[0] || '').trim().toUpperCase();
+            return col0 && col0 !== 'NAME' && col0 !== 'NOMBRE';
+        });
         const workerEmails = {};
         for (const row of workerRows) {
             const name  = (row[0] || '').trim().toUpperCase();
@@ -189,13 +194,23 @@ module.exports = async function handler(req, res) {
                            status.includes('TERMINAD') || status.includes('ENVIADO');
             if (!byWorker[worker]) byWorker[worker] = { today: [], tomorrow: [], all: [] };
             if (!isDone) {
-                byWorker[worker].all.push({ text: task, deadline: [dayStr, timeStr].filter(Boolean).join(' ') || '—' });
-                const dl = parseDate(dayStr);
-                if (dl) {
-                    const dlStr = dl.toLocaleDateString('en-CA');
-                    const entry = { text: task, deadline: [dayStr, timeStr].filter(Boolean).join(' ') };
-                    if (dlStr === todayStr)    byWorker[worker].today.push(entry);
-                    if (dlStr === tomorrowStr) byWorker[worker].tomorrow.push(entry);
+                const deadlineLabel = [dayStr, timeStr].filter(Boolean).join(' ') || '—';
+                byWorker[worker].all.push({ text: task, deadline: deadlineLabel });
+                const entry = { text: task, deadline: deadlineLabel };
+                const dayUp = dayStr.toUpperCase();
+                // Spanish text deadlines: "Hoy", "HOY", "Mañana", "MAÑANA"
+                if (dayUp.startsWith('HOY') || dayUp.startsWith('HO ')) {
+                    byWorker[worker].today.push(entry);
+                } else if (dayUp.startsWith('MA\u00D1ANA') || dayUp.startsWith('MANANA')) {
+                    byWorker[worker].tomorrow.push(entry);
+                } else {
+                    // Try DD/MM/YYYY or standard date format
+                    const dl = parseDate(dayStr);
+                    if (dl) {
+                        const dlStr = dl.toLocaleDateString('en-CA');
+                        if (dlStr === todayStr)    byWorker[worker].today.push(entry);
+                        if (dlStr === tomorrowStr) byWorker[worker].tomorrow.push(entry);
+                    }
                 }
             }
         }
@@ -247,6 +262,7 @@ module.exports = async function handler(req, res) {
                 tomorrow: tomorrowStr,
                 isMonday,
                 workerEmails,
+                workerCSVSnippet: workerCSV.slice(0, 300),
                 byWorker,
                 mainEmail: mainEmail || null,
             });
