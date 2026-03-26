@@ -4,6 +4,12 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "devCommand": null,
+  "crons": [
+    {
+      "path": "/api/cron-reminders",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "routes": [
     {
       "src": "/api/proxy",
@@ -12,6 +18,10 @@
     {
       "src": "/api/notify-email",
       "dest": "/api/notify-email.js"
+    },
+    {
+      "src": "/api/cron-reminders",
+      "dest": "/api/cron-reminders.js"
     },
     {
       "src": "/css/(.*)",
