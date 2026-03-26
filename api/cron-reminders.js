@@ -158,14 +158,18 @@ module.exports = async function handler(req, res) {
         const workerCSV = await fetchText(SPREADSHEET_BASE + GID_TRABAJADORES + '&t=' + Date.now());
         const workerAllRows = parseCSV(workerCSV);
         // Skip header row — but handle both "NAME,EMAIL" header and headerless sheets
-        const workerRows = workerAllRows.filter(r => {
-            const col0 = (r[0] || '').trim().toUpperCase();
-            return col0 && col0 !== 'NAME' && col0 !== 'NOMBRE';
-        });
+        // Sheet has a leading empty column: [empty, NAME, EMAIL]
+        // Find the NAME column by scanning the header row for "NAME" or "NOMBRE"
+        const workerHeader = workerAllRows[0] || [];
+        const nameCol  = workerHeader.findIndex(c => /^nombre$/i.test(c.trim()) || /^name$/i.test(c.trim()));
+        const emailCol = workerHeader.findIndex(c => /^email$/i.test(c.trim()) || /^correo$/i.test(c.trim()));
+        const nc = nameCol  >= 0 ? nameCol  : 1; // fallback: col 1
+        const ec = emailCol >= 0 ? emailCol : 2; // fallback: col 2
+        const workerRows = workerAllRows.slice(1); // skip header
         const workerEmails = {};
         for (const row of workerRows) {
-            const name  = (row[0] || '').trim().toUpperCase();
-            const email = (row[1] || '').trim();
+            const name  = (row[nc] || '').trim().toUpperCase();
+            const email = (row[ec] || '').trim();
             if (name && email.includes('@')) workerEmails[name] = email;
         }
 
