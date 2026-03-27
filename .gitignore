@@ -3,5 +3,5 @@
 node_modules/
 original/
 additum3D.zip
-api/proxy.php
-api/.htaccess
+additum3D-v2.zip
+api/.env.php

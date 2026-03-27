@@ -1,5 +1,10 @@
 # These files are for local development (Laragon/Apache) only.
-# Vercel uses api/proxy.js (Node.js) instead — these are ignored at deploy time.
+# Vercel uses *.js serverless functions instead.
 api/proxy.php
+api/notify-email.php
+api/cron-reminders.php
 api/.htaccess
+api/.env.php
+api/.env.php.example
 additum3D.zip
+additum3D-v2.zip
