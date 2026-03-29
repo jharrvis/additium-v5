@@ -198,9 +198,13 @@ Supports both 6-column and 7-column formats:
 | 6 | Time (deadline) | — |
 
 **Deadline formats accepted:**
-- `Hoy` / `HOY` → sends reminder today
-- `Mañana` / `MAÑANA` → sends reminder tomorrow
-- `DD/MM/YYYY` → standard date format
+- `DD/MM/YYYY` → standard date format — used by cron reminders
+- `Hoy` / `HOY` → dashboard display only (highlights as due today; cron ignores)
+- `Mañana` / `MAÑANA` → dashboard display only (highlights as due tomorrow; cron ignores)
+
+> **Important:** Use `DD/MM/YYYY` dates for tasks that need scheduled email reminders.
+> Text values like `Hoy` / `Mañana` are relative and never expire — the cron would
+> send a reminder every single day if these were included.
 
 **Priority values:** `URGENTE`, `ALTA`, `NORMAL`, `BAJA`
 

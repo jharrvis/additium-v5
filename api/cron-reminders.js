@@ -201,20 +201,13 @@ module.exports = async function handler(req, res) {
                 const deadlineLabel = [dayStr, timeStr].filter(Boolean).join(' ') || '—';
                 byWorker[worker].all.push({ text: task, deadline: deadlineLabel });
                 const entry = { text: task, deadline: deadlineLabel };
-                const dayUp = dayStr.toUpperCase();
-                // Spanish text deadlines: "Hoy", "HOY", "Mañana", "MAÑANA"
-                if (dayUp.startsWith('HOY') || dayUp.startsWith('HO ')) {
-                    byWorker[worker].today.push(entry);
-                } else if (dayUp.startsWith('MA\u00D1ANA') || dayUp.startsWith('MANANA')) {
-                    byWorker[worker].tomorrow.push(entry);
-                } else {
-                    // Try DD/MM/YYYY or standard date format
-                    const dl = parseDate(dayStr);
-                    if (dl) {
-                        const dlStr = dl.toLocaleDateString('en-CA');
-                        if (dlStr === todayStr)    byWorker[worker].today.push(entry);
-                        if (dlStr === tomorrowStr) byWorker[worker].tomorrow.push(entry);
-                    }
+                // Only process real DD/MM/YYYY dates — skip relative text like "Hoy"/"Mañana"
+                // (text-based values never expire and would trigger reminders every day)
+                const dl = parseDate(dayStr);
+                if (dl) {
+                    const dlStr = dl.toLocaleDateString('en-CA');
+                    if (dlStr === todayStr)    byWorker[worker].today.push(entry);
+                    if (dlStr === tomorrowStr) byWorker[worker].tomorrow.push(entry);
                 }
             }
         }

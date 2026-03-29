@@ -109,11 +109,10 @@ function parseDeadlineDate(string $s): ?DateTime {
     return $d ?: null;
 }
 
-// ── Helper: classify deadline day string ─────────────────────────────────────
+// ── Helper: classify deadline day string (real dates only) ───────────────────
+// Text-based values like "Hoy"/"Mañana" are skipped — they never expire and
+// would trigger cron reminders every day indefinitely.
 function classifyDeadline(string $dayStr, string $todayStr, string $tomorrowStr): ?string {
-    $up = strtoupper(trim($dayStr));
-    if (str_starts_with($up, 'HOY') || str_starts_with($up, 'HO ')) return 'today';
-    if (str_starts_with($up, 'MAÑANA') || str_starts_with($up, 'MANANA') || str_starts_with($up, 'MA\u00D1ANA')) return 'tomorrow';
     $dl = parseDeadlineDate($dayStr);
     if ($dl) {
         $dlStr = $dl->format('Y-m-d');
